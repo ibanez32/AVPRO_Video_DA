@@ -354,6 +354,7 @@ public class StateController : SingletonBehaviour<StateController>
                 if (item.id == media)
                 {
                     item.PathLocal = GetAbsolutPath(media);
+                   // item.PathLocal = item.id+".mp4";
                 }
             }
         }
@@ -435,6 +436,7 @@ public class StateController : SingletonBehaviour<StateController>
         if (!StopDowloadMoive)
         {
             DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal = _absolutPath;
+           // DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal =DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id + ".mp4";
             saving_medias.Add(DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id);
             string str = JsonMapper.ToJson(saving_medias);
             WriteStringToFile(str, "SavedMediaList");
@@ -742,6 +744,7 @@ public class StateController : SingletonBehaviour<StateController>
         string _absolutPath = "";
         //_absolutPath = Application.persistentDataPath + "/" + id + ".mp4";
         _absolutPath = PathForDocumentsFile(id) + ".mp4";
+       // _absolutPath = Application.dataPath + "/StreamingAssets/" + id + ".mp4";
         // Debug.Log("PATH= "+_absolutPath);
         return _absolutPath;
     }

@@ -56,7 +56,13 @@ using UGS;
              if (response.ContainsKey("errNo") && response["errNo"].AsInt() == 0&&response.ContainsKey("code"))
             {
                 StateController.Instance.Canvas.SetActive(true);
-                StateController.Instance.PIN_text.text = response["code"].AsInt().ToString();
+                string label = null;
+                foreach (char c in response["code"].AsInt().ToString())
+                {
+                    label += c + " ";
+                }
+                //StateController.Instance.PIN_text.text = response["code"].AsInt().ToString();
+                StateController.Instance.PIN_text.text = label;
                 Context.StartCoroutine(RepeatRequest());
 
             }

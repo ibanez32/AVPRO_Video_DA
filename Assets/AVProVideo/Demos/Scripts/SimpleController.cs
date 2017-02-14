@@ -266,7 +266,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
         }
 
 
-        void OnGUI()
+     /*   void OnGUI()
         {
             if (_mediaPlayer == null)
             {
@@ -433,6 +433,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
             //
             //
             GUILayout.EndVertical();
-        }
+        }*/
     }
+   
 }
