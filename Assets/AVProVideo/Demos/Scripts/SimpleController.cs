@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,9 +19,9 @@ namespace RenderHeads.Media.AVProVideo.Demos
     /// </summary>
     public class SimpleController : MonoBehaviour
     {
-        public string _folder = "AVProVideoSamples/";
-        public string[] _filenames = new string[] { "SampleSphere.mp4", "BigBuckBunny_360p30.mp3", "BigBuckBunny_720p30.mp4" };
-        public string[] _streams;
+      //  public string _folder = "AVProVideoSamples/";
+      //  public string[] _filenames = new string[] { "SampleSphere.mp4", "BigBuckBunny_360p30.mp3", "BigBuckBunny_720p30.mp4" };
+      //  public string[] _streams;
         public MediaPlayer _mediaPlayer;
         public DisplayIMGUI _display;
         public GUISkin _guiSkin;
@@ -28,7 +29,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
         private int _width;
         private int _height;
         private float _durationSeconds;
-        public bool _useFading = true;
+        public bool _useFading = false;
         private Queue<string> _eventLog = new Queue<string>(8);
         private float _eventTimer = 1f;
         private MediaPlayer.FileLocation _nextVideoLocation;
@@ -52,10 +53,10 @@ namespace RenderHeads.Media.AVProVideo.Demos
 
 
 
-        public void ReplacePlayVideo(string path, int offset)
+        public void ReplacePlayVideo(string path, int offset,bool url)
         {
 
-            LoadVideo(path, true);
+            LoadVideo(path, url);
             Offset = offset;
 
         }
@@ -69,32 +70,42 @@ namespace RenderHeads.Media.AVProVideo.Demos
         {
             switch (et)
             {
+                case MediaPlayerEvent.EventType.Error:
+                  StateController.Instance.SetSelectedClip(true);
+                    break;
                 case MediaPlayerEvent.EventType.ReadyToPlay:
                     //_mediaPlayer.Control.Seek(Offset);
                    // _mediaPlayer.Control.Play();
                     break;
                 case MediaPlayerEvent.EventType.Started:
-                    Debug.Log("EventType.Started");
-                    
+
+                    DateTime localDate = DateTime.Now;
+                int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
+                var Item = DataSchedule.Instance.GetDataschedules()
+                .Find(
+                    elm =>
+                        Int32.Parse(elm.TimeStart) <= mSec &&
+                        (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
+                Offset = mSec - Int32.Parse(Item.TimeStart);
                     _mediaPlayer.Control.Seek(Offset);
                   
 
                     break;
                 case MediaPlayerEvent.EventType.FirstFrameReady:
-                    Debug.Log("EventType.FirstFrameReady");
-                   // _mediaPlayer.Control.Seek(Offset);
-                    if (StateController.Instance.GetIsFirstDowloadClip())
-                    {
-                        if (!StateController.Instance.GetIsDowloadMovie())
-                        {
-                            StateController.Instance.SetstopDowloadMovie(false);
-                            StateController.Instance.StartDeleteClip();
-                            
-                        }
-                        
-                        StateController.Instance.SetIsFirstDowload(false);
 
+                   // _mediaPlayer.Control.Seek(Offset);
+                if (StateController.Instance.GetIsFirstDowloadClip())
+                {
+                    if (!StateController.Instance.GetIsDowloadMovie())
+                    {
+                        StateController.Instance.SetstopDowloadMovie(false);
+                        StateController.Instance.StartDeleteClip();
+                        
                     }
+                    
+                    StateController.Instance.SetIsFirstDowload(false);
+               
+                }
                     break;
                 case MediaPlayerEvent.EventType.MetaDataReady:
                     GatherProperties();
@@ -121,13 +132,13 @@ namespace RenderHeads.Media.AVProVideo.Demos
                             pathLoad = DataSchedule.Instance.GetDataschedules()[StateController.Instance.GetCurrentClip()].PathLoad;
                         }
                         int offset = 0;
-                        ReplacePlayVideo(pathLoad, offset);
+                        ReplacePlayVideo(pathLoad, offset,false);
                     }
                     
                     break;
             }
 
-            AddEvent(et);
+           // AddEvent(et);
         }
 
         private void AddEvent(MediaPlayerEvent.EventType et)
@@ -153,25 +164,25 @@ namespace RenderHeads.Media.AVProVideo.Demos
 
         void Update()
         {
+         //
+         //   if (!_useFading)
+         //   {
+         //       if (_display != null && _display._mediaPlayer != null && _display._mediaPlayer.Control != null)
+         //       {
+         //           _display._color = Color.white;
+         //           _display._mediaPlayer.Control.SetVolume(1f);
+         //       }
+         //   }
 
-            if (!_useFading)
-            {
-                if (_display != null && _display._mediaPlayer != null && _display._mediaPlayer.Control != null)
-                {
-                    _display._color = Color.white;
-                    _display._mediaPlayer.Control.SetVolume(1f);
-                }
-            }
-
-            if (_eventLog != null && _eventLog.Count > 0)
-            {
-                _eventTimer -= Time.deltaTime;
-                if (_eventTimer < 0f)
-                {
-                    _eventLog.Dequeue();
-                    _eventTimer = 1f;
-                }
-            }
+         //  if (_eventLog != null && _eventLog.Count > 0)
+         //  {
+         //      _eventTimer -= Time.deltaTime;
+         //      if (_eventTimer < 0f)
+         //      {
+         //          _eventLog.Dequeue();
+         //          _eventTimer = 1f;
+         //      }
+         //  }
         }
 
         private void LoadVideo(string filePath, bool url = false)
@@ -179,6 +190,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
             // Set the video file name and to load. 
             if (!url)
                 _nextVideoLocation = MediaPlayer.FileLocation.RelativeToStreamingAssetsFolder;
+               // _nextVideoLocation = MediaPlayer.FileLocation.RelativeToProjectFolder;
             else
                 _nextVideoLocation = MediaPlayer.FileLocation.AbsolutePathOrURL;
             _nextVideoPath = filePath;

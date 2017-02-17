@@ -29,7 +29,7 @@ public class FB_Controller : MonoBehaviour {
             if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
             {
                 PhysicalAddress address = adapter.GetPhysicalAddress();
-                Debug.Log("Adapter=" + adapter.NetworkInterfaceType);
+              //  Debug.Log("Adapter=" + adapter.NetworkInterfaceType);
 
                 byte[] bytes = address.GetAddressBytes();
 

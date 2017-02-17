@@ -108,7 +108,7 @@ using UGS;
 
 
         }
-        Debug.Log("MAC=  " + mac);
+     //   Debug.Log("MAC=  " + mac);
         return mac;
     }
 }

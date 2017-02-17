@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using LitJsonSrc;
+using RenderHeads.Media.AVProVideo;
 using RenderHeads.Media.AVProVideo.Demos;
 using UnityEngine;
 using System.Collections;
@@ -61,6 +62,10 @@ public class StateController : SingletonBehaviour<StateController>
     void Update()
     {
         SelectedNumberClip();
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
         //-------Select time interval
 
         //-------END Select time interval
@@ -149,6 +154,8 @@ public class StateController : SingletonBehaviour<StateController>
                 elm =>
                     Int32.Parse(elm.TimeStart) <= mSec &&
                     (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
+            int offset = mSec - Int32.Parse(Item.TimeStart);
+                
             if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) >= 0)
             {
                 CurrentNumberClip = DataSchedule.Instance.GetDataschedules().IndexOf(Item);
@@ -159,14 +166,16 @@ public class StateController : SingletonBehaviour<StateController>
                 {
                     pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                     DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
+                    ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
                 }
                 else
                 {
                     pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
                     DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
+                    ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
                 }
-                int offset = mSec - Int32.Parse(Item.TimeStart);
-                ControllerVP.ReplacePlayVideo(pathLoad, offset);
+                            
+               
                 Debug.Log("Path" + pathLoad);
                 Debug.Log("offset" + offset);
                 SelectedClip = false;
@@ -190,6 +199,12 @@ public class StateController : SingletonBehaviour<StateController>
                     elm =>
                         Int32.Parse(elm.TimeStart) <= mSec &&
                         (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
+
+                int offset = 0;
+                if (Item!=null)
+                {
+                    offset = mSec - Int32.Parse(Item.TimeStart);
+                }
                 if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) >= 0&&DataSchedule.Instance.GetDataschedules().IndexOf(Item) != CurrentNumberClip)
                 {
                     Debug.Log("Enter");
@@ -206,16 +221,18 @@ public class StateController : SingletonBehaviour<StateController>
                             {
                                 pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
+                                ControllerVP.ReplacePlayVideo(pathLoad, offset,false);
                             }
                             else
                             {
                                 pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
                                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
+                                ControllerVP.ReplacePlayVideo(pathLoad, offset,true);
                             }
-                            int offset = mSec - Int32.Parse(Item.TimeStart);
-                            ControllerVP.ReplacePlayVideo(pathLoad, offset);
-                            Debug.Log("Path" + pathLoad);
-                            Debug.Log("offset" + offset);
+                            
+                            
+                          //  Debug.Log("Path" + pathLoad);
+                          //  Debug.Log("offset" + offset);
                         }
                        
                     }
@@ -228,14 +245,18 @@ public class StateController : SingletonBehaviour<StateController>
                         {
                             pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                             DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
+                            ControllerVP.ReplacePlayVideo(pathLoad, offset,false);
+                            
                         }
                         else
                         {
                             pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
                             DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
+                            ControllerVP.ReplacePlayVideo(pathLoad, offset,true);
+                           
                         }
-                        int offset = mSec - Int32.Parse(Item.TimeStart);
-                        ControllerVP.ReplacePlayVideo(pathLoad, offset);
+                        
+                       
                         Debug.Log("Path" + pathLoad);
                         Debug.Log("offset" + offset);
                     }
@@ -293,55 +314,64 @@ public class StateController : SingletonBehaviour<StateController>
                 saved_medias.Add(list[i].ToString());
             }
         }
-        Debug.Log("SavedMediaList  ----------------------------");
+       // Debug.Log("SavedMediaList  ----------------------------");
 
 
-        foreach (var VARIABLE in saved_medias)
-        {
-            Debug.Log(VARIABLE);
-        }
-        Debug.Log("MediasSchedule  ----------------------------");
-
-
-        foreach (var VARIABLE in mediasSchedule)
-        {
-            Debug.Log(VARIABLE);
-        }
-        Debug.Log("Saving  ----------------------------");
+      //  foreach (var VARIABLE in saved_medias)
+      //  {
+      //      Debug.Log(VARIABLE);
+      //  }
+     //   Debug.Log("MediasSchedule  ----------------------------");
+     //
+     //
+     //   foreach (var VARIABLE in mediasSchedule)
+     //   {
+     //       Debug.Log(VARIABLE);
+     //   }
+     //   Debug.Log("Saving  ----------------------------");
         var intersect_medias = mediasSchedule.Intersect(saved_medias);
         foreach (string media in intersect_medias)
         {
             saving_medias.Add(media);
         }
-        foreach (var VARIABLE in saving_medias)
-        {
-            Debug.Log(VARIABLE);
-        }
-        Debug.Log("Delete  ----------------------------");
+    //   foreach (var VARIABLE in saving_medias)
+    //   {
+    //       Debug.Log(VARIABLE);
+    //   }
+     //   Debug.Log("Delete  ----------------------------");
         var except_medias = saved_medias.Except(saving_medias);
         foreach (string media in except_medias)
         {
             delete_medias.Add(media);
-            Debug.Log(media);
+            //Debug.Log(media);
         }
-        foreach (var VARIABLE in delete_medias)
-        {
-            Debug.Log(VARIABLE);
+     //   IEnumerable<string> distinctAges = delete_medias.Distinct();
 
-        }
+       // delete_medias.Clear();
+
+      //  foreach (string media in distinctAges)
+      //  {
+      //      delete_medias.Add(media);
+      //  }
+     //   Debug.Log("+++++++++++  ----------------------------");
+     //   foreach (var VARIABLE in distinctAges)
+     //   {
+      //      Debug.Log(VARIABLE);
+
+    //    }
         string str = JsonMapper.ToJson(saving_medias);
 
         WriteStringToFile(str, "SavedMediaList");
-        Debug.Log("Prepare  ----------------------------");
+     //   Debug.Log("Prepare  ----------------------------");
         var except_prepare = mediasSchedule.Except(saving_medias);
         foreach (string media in except_prepare)
         {
             prepare_medias.Add(media);
         }
-        foreach (var VARIABLE in prepare_medias)
-        {
-            Debug.Log(VARIABLE);
-        }
+     //   foreach (var VARIABLE in prepare_medias)
+      //  {
+     //       Debug.Log(VARIABLE);
+     //   }
         //-------- writing to DataClip
         foreach (ItemDataschedule item in DataSchedule.Instance.GetDataschedules())
         {
@@ -353,8 +383,8 @@ public class StateController : SingletonBehaviour<StateController>
             {
                 if (item.id == media)
                 {
-                    item.PathLocal = GetAbsolutPath(media);
-                   // item.PathLocal = item.id+".mp4";
+                   // item.PathLocal = GetAbsolutPath(media);
+                    item.PathLocal = item.id+".mp4";
                 }
             }
         }
@@ -390,8 +420,8 @@ public class StateController : SingletonBehaviour<StateController>
             {
                 numberCurrentDowloadClip = 0;
             }
-            Debug.Log("   number=" + numberCurrentDowloadClip);
-            Debug.Log("_________ mSec=" + mSec + "   number=" + numberCurrentDowloadClip + "   start" + DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].TimeStart + "   id=" + DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id);
+           // Debug.Log("   number=" + numberCurrentDowloadClip);
+          //  Debug.Log("_________ mSec=" + mSec + "   number=" + numberCurrentDowloadClip + "   start" + DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].TimeStart + "   id=" + DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id);
        
             StartCoroutine(_CroutineDownloadMoive());
         }
@@ -406,7 +436,7 @@ public class StateController : SingletonBehaviour<StateController>
                 string pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
                 int offset = mSec - Int32.Parse(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].TimeStart);
-                ControllerVP.ReplacePlayVideo(pathLoad, offset);
+                ControllerVP.ReplacePlayVideo(pathLoad, offset,false);
             }
             
         }
@@ -432,11 +462,11 @@ public class StateController : SingletonBehaviour<StateController>
 
     public void CheckContinueDowloadMoive()
     {
-        Debug.Log("Start CheckContinueDowloadMoive");
+      //  Debug.Log("Start CheckContinueDowloadMoive");
         if (!StopDowloadMoive)
         {
-            DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal = _absolutPath;
-           // DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal =DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id + ".mp4";
+            //DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal = _absolutPath;
+            DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal =DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id + ".mp4";
             saving_medias.Add(DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id);
             string str = JsonMapper.ToJson(saving_medias);
             WriteStringToFile(str, "SavedMediaList");
@@ -445,20 +475,22 @@ public class StateController : SingletonBehaviour<StateController>
             {
                 if (itemDataschedule.id == DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id)
                 {
-                    itemDataschedule.PathLocal = _absolutPath;
+                    //itemDataschedule.PathLocal = _absolutPath;
+                    itemDataschedule.PathLocal = itemDataschedule.id + ".mp4";
                 }
             }
-            Debug.Log("Point_1");
+         //   Debug.Log("Point_1");
            
             if (ControllerVP._mediaPlayer.Control.IsPlaying() && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal!=null)
             {
-                Debug.Log("Point_2");
+               // Debug.Log("Point_2");
                 DateTime localDate = DateTime.Now;
                 int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
                string pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
+               
                 int offset = mSec - Int32.Parse(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].TimeStart);
-                ControllerVP.ReplacePlayVideo(pathLoad, offset);
+                ControllerVP.ReplacePlayVideo(pathLoad, offset,false);
             }
             
             numberDowloadClip++;
@@ -478,13 +510,14 @@ public class StateController : SingletonBehaviour<StateController>
             }
             if (numberDowloadClip < DataSchedule.Instance.GetDataschedules().Count)
             {
-                Debug.Log("Finish 1 CheckContinueDowloadMoive");
+               // Debug.Log("Finish 1 CheckContinueDowloadMoive");
                 StartCoroutine(_CroutineDownloadMoive());
                 
             }
             else
             {
-                Debug.Log("ALL COMPLETE");
+               // Debug.Log("ALL COMPLETE");
+              //  DataSchedule.Instance.PrintDataSchedule();
                 isDowloadMovie = false;
             }
         }
@@ -554,15 +587,32 @@ public class StateController : SingletonBehaviour<StateController>
                 break;
             }
         }
-        isWWW = false;
+        if (www_test.error==null)
+        {
+            isWWW = false;
         Debug.Log("Finish1 Dowload");
         CheckContinuewritingMovie();
+        }
+        else
+        {
+             Debug.Log("Finish1 Dowload ERROR");
+            if (StopDowloadMoive)
+            {
+               CheckContinuewritingMovie();
+            }
+            else
+            {
+                StartCoroutine(_CroutineDownloadMoive());
+   
+            }
+        }
+        
 
     }
 
     IEnumerator _CoroutineWritingMovi()
     {
-        Debug.Log("Start Writing");
+       // Debug.Log("Start Writing");
         if (filestream!=null&& filestream.CanWrite)
         {
             filestream.Close();
@@ -690,7 +740,7 @@ public class StateController : SingletonBehaviour<StateController>
        
         totalDownloaded = 0;
        // yield return waitForSeconds;
-        Debug.Log("Write Complete1");
+      //  Debug.Log("Write Complete1");
         CheckContinueDowloadMoive();
 
 
@@ -705,7 +755,7 @@ public class StateController : SingletonBehaviour<StateController>
         }
         else
         {
-            Debug.Log("NO DELETE");
+          //  Debug.Log("NO DELETE");
             StartDowloadMoive();
         }
     }
@@ -723,11 +773,13 @@ public class StateController : SingletonBehaviour<StateController>
             {
                 try
                 {
+                    Debug.Log("Delete= " + GetAbsolutPath(delete_medias[totalDeleted]));
                     File.Delete(GetAbsolutPath(delete_medias[totalDeleted]));
                 }
                 catch (System.IO.IOException e)
                 {
-                    Debug.Log(e.Data);
+                    Debug.Log("NO Delete= " + GetAbsolutPath(delete_medias[totalDeleted]));
+                    Debug.Log("EXEP= "+e.Data);
 
                 }
 
@@ -743,8 +795,8 @@ public class StateController : SingletonBehaviour<StateController>
     {
         string _absolutPath = "";
         //_absolutPath = Application.persistentDataPath + "/" + id + ".mp4";
-        _absolutPath = PathForDocumentsFile(id) + ".mp4";
-       // _absolutPath = Application.dataPath + "/StreamingAssets/" + id + ".mp4";
+       // _absolutPath = PathForDocumentsFile(id) + ".mp4";
+        _absolutPath = Application.dataPath + "/StreamingAssets/" + id + ".mp4";
         // Debug.Log("PATH= "+_absolutPath);
         return _absolutPath;
     }

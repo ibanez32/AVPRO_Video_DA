@@ -72,7 +72,7 @@ using UGS;
                         
 
                      }
-                     Debug.Log(response["data"]["schedule"]["mediasIdList"].Count);
+                 //    Debug.Log(response["data"]["schedule"]["mediasIdList"].Count);
 
                      int i = 0;
                      foreach (string VARIABLE in tdMediasIdList.Keys)
@@ -145,7 +145,7 @@ using UGS;
              if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
              {
                  PhysicalAddress address = adapter.GetPhysicalAddress();
-                 Debug.Log("Adapter=" + adapter.NetworkInterfaceType);
+               //  Debug.Log("Adapter=" + adapter.NetworkInterfaceType);
 
                  byte[] bytes = address.GetAddressBytes();
 
@@ -163,7 +163,7 @@ using UGS;
 
 
          }
-         Debug.Log("MAC=  " + mac);
+        // Debug.Log("MAC=  " + mac);
          return mac;
      }
  }

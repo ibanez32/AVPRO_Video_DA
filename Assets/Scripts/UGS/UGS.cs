@@ -320,6 +320,7 @@ namespace UGS
             return response;
         }
     }
+
     public class LoginProcedure : UGSRequestProcedure<string>
     {
         private readonly string _login;
