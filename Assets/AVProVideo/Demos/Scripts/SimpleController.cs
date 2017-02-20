@@ -6,9 +6,6 @@ using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using LitJsonSrc;
 using UGS;
-//-----------------------------------------------------------------------------
-// Copyright 2015-2016 RenderHeads Ltd.  All rights reserverd.
-//-----------------------------------------------------------------------------
 
 using RenderHeads.Media.AVProVideo;
 
