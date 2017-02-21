@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public class StateController : SingletonBehaviour<StateController>
 {
     public FB_Controller FB_datebase;
-    public SimpleController ControllerVP;
+    public UMP_Controller ControllerVP;
     public GameObject Canvas;
     public Text PIN_text;
     private Context ContextState;
@@ -103,7 +103,7 @@ public class StateController : SingletonBehaviour<StateController>
 
     public void StopPlayer()
     {
-        ControllerVP._mediaPlayer.Control.Stop();
+        ControllerVP._mediaPlayer.Stop();
     }
     public void SetCurrentClip(int num)
     {
@@ -210,9 +210,11 @@ public class StateController : SingletonBehaviour<StateController>
                     Debug.Log("Enter");
                     if (CurrentNumberClip==-1)
                     {
+                        Debug.Log("Enter2");
                         //SetIsFirstDowload(true);
                         if (!isDowloadMovie)
                         {
+                            Debug.Log("Enter3");
                             PrepareMediasList();
                             CurrentNumberClip = DataSchedule.Instance.GetDataschedules().IndexOf(Item);
                             string pathLoad = null;
@@ -231,7 +233,7 @@ public class StateController : SingletonBehaviour<StateController>
                             }
                             
                             
-                          //  Debug.Log("Path" + pathLoad);
+                            Debug.Log("Path" + pathLoad);
                           //  Debug.Log("offset" + offset);
                         }
                        
@@ -265,7 +267,7 @@ public class StateController : SingletonBehaviour<StateController>
                 }
                 if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) < 0&&isFirstDowloadClip)
                 {
-                    if (ControllerVP._mediaPlayer.Control.IsPlaying())
+                    if (ControllerVP._mediaPlayer.IsPlaying)
                     {
                         StopPlayer();
                     }
@@ -428,7 +430,7 @@ public class StateController : SingletonBehaviour<StateController>
         else
         {
             Debug.Log("NO DOWLOAD CLIP");
-            if (ControllerVP._mediaPlayer.Control.IsPlaying() && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
+            if (ControllerVP._mediaPlayer.IsPlaying && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
             {
                 Debug.Log("Point_2");
                 DateTime localDate = DateTime.Now;
@@ -480,8 +482,8 @@ public class StateController : SingletonBehaviour<StateController>
                 }
             }
          //   Debug.Log("Point_1");
-           
-            if (ControllerVP._mediaPlayer.Control.IsPlaying() && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal!=null)
+
+            if (ControllerVP._mediaPlayer.IsPlaying && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
             {
                // Debug.Log("Point_2");
                 DateTime localDate = DateTime.Now;
@@ -780,6 +782,21 @@ public class StateController : SingletonBehaviour<StateController>
                 {
                     Debug.Log("NO Delete= " + GetAbsolutPath(delete_medias[totalDeleted]));
                     Debug.Log("EXEP= "+e.Data);
+
+                }
+
+            }
+            if (File.Exists(GetAbsolutPath(delete_medias[totalDeleted])+".meta"))
+            {
+                try
+                {
+                    Debug.Log("Delete= " + GetAbsolutPath(delete_medias[totalDeleted]) + ".meta");
+                    File.Delete(GetAbsolutPath(delete_medias[totalDeleted]));
+                }
+                catch (System.IO.IOException e)
+                {
+                    Debug.Log("NO Delete= " + GetAbsolutPath(delete_medias[totalDeleted]) + ".meta");
+                    Debug.Log("EXEP= " + e.Data);
 
                 }
 

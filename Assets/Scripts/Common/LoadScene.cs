@@ -7,7 +7,7 @@ public class LoadScene : MonoBehaviour {
 	// Use this for initialization
 	IEnumerator Start () {
 	yield return   new WaitForSeconds(2f);
-    SceneManager.LoadScene("Demo_imGui");
+    SceneManager.LoadScene("DA_player");
 	   // StartCoroutine(Load());
 	}
 	
@@ -18,7 +18,7 @@ public class LoadScene : MonoBehaviour {
 
     IEnumerator Load()
     {
-        AsyncOperation async = Application.LoadLevelAdditiveAsync("Demo_imGui");
+        AsyncOperation async = Application.LoadLevelAdditiveAsync("DA_player");
         yield return async;
     }
 }

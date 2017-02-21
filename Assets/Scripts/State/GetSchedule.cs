@@ -48,7 +48,7 @@ using UGS;
          yield return Context.StartCoroutine(shedule.Process());
          if (!shedule.HasError)
          {
-             Debug.Log("Shedule");
+             Debug.Log("Shedule="+shedule.Result);
             StateController.Instance.StopSelectNumberClip();
            StateController.Instance.SetstopDowloadMovie(true);
             // StateController.Instance.StopDeleteClip();
