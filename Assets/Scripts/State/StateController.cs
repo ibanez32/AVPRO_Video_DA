@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using LitJsonSrc;
 using RenderHeads.Media.AVProVideo;
 using RenderHeads.Media.AVProVideo.Demos;
+using UGS;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
@@ -15,7 +17,7 @@ public class StateController : SingletonBehaviour<StateController>
     public UMP_Controller ControllerVP;
     public GameObject Canvas;
     public Text PIN_text;
-    private Context ContextState;
+   // private Context ContextState;
     private int CurrentNumberClip;
     //Dowload Movi
     private List<string> mediasSchedule;
@@ -26,13 +28,13 @@ public class StateController : SingletonBehaviour<StateController>
     private int numberDowloadClip;
     private int numberCurrentDowloadClip;
     
-    private int totalDownloaded;
+   private int totalDownloaded;
    
     private int contentLength;
     private int ItemSizeLoad;
     private FileStream filestream;
     private WWW www_test;
-    private Stream stream;
+    private Stream stream=null;
     private string _absolutPath;
     private bool isFirstDowloadClip;
     private WaitForSeconds waitForSeconds;
@@ -61,7 +63,7 @@ public class StateController : SingletonBehaviour<StateController>
     // Update is called once per frame
     void Update()
     {
-        SelectedNumberClip();
+       // SelectedNumberClip();
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
@@ -97,7 +99,8 @@ public class StateController : SingletonBehaviour<StateController>
         numberDowloadClip = 0;
       
         CurrentNumberClip = -1;
-        ContextState = new Context(new GetPinState(this));
+        //ContextState = new Context(new GetPinState(this));
+        LoadShedule();
         
     }
 
@@ -120,7 +123,11 @@ public class StateController : SingletonBehaviour<StateController>
     }
     public void ChangeState(Mark mark)
     {
-        ContextState.FindOut(mark);
+       // ContextState.FindOut(mark);
+        if (mark==Mark.GetSchedule)
+        {
+            LoadShedule();
+        }
     }
     //--------Select Number Clip
     public void StartSelectNumberClip()
@@ -614,7 +621,7 @@ public class StateController : SingletonBehaviour<StateController>
 
     IEnumerator _CoroutineWritingMovi()
     {
-       // Debug.Log("Start Writing");
+        Debug.Log("Start Writing");
         if (filestream!=null&& filestream.CanWrite)
         {
             filestream.Close();
@@ -812,8 +819,8 @@ public class StateController : SingletonBehaviour<StateController>
     {
         string _absolutPath = "";
         //_absolutPath = Application.persistentDataPath + "/" + id + ".mp4";
-       // _absolutPath = PathForDocumentsFile(id) + ".mp4";
-        _absolutPath = Application.dataPath + "/StreamingAssets/" + id + ".mp4";
+       _absolutPath = PathForDocumentsFile(id) + ".mp4";
+       // _absolutPath = Application.dataPath + "/StreamingAssets/" + id + ".mp4";
         // Debug.Log("PATH= "+_absolutPath);
         return _absolutPath;
     }
@@ -887,5 +894,134 @@ return null;
             return Path.Combine(path, filename);
         }
 
+    }
+    private void LoadShedule()
+    {
+        UGS.UgsClient m_client_shedule = new UgsClient("https://beta.dropadverts.com/player/get-schedule");
+        UGS.Auth_PIN shedule = m_client_shedule.Auth_pin(ShowNetworkInterfaces());
+        StartCoroutine(LoadASheduleAsynk(shedule));
+    }
+    private IEnumerator LoadASheduleAsynk(UGS.Auth_PIN shedule)
+    {
+        yield return StartCoroutine(shedule.Process());
+        if (!shedule.HasError)
+        {
+            Debug.Log("Shedule=" + shedule.Result);
+            StateController.Instance.StopSelectNumberClip();
+            StateController.Instance.SetstopDowloadMovie(true);
+            // StateController.Instance.StopDeleteClip();
+            //StateController.Instance.StoptDowloadMoive();
+            DataSchedule.Instance.ClearDataschedules();
+
+
+            JsonData response = LitJsonSrc.JsonMapper.ToObject(shedule.Result);
+            if (response.ContainsKey("data"))
+            {
+
+                if (response["data"]["schedule"].ContainsKey("mediasIdList"))
+                {
+                    IDictionary tdMediasIdList = response["data"]["schedule"]["mediasIdList"] as IDictionary;
+                    IDictionary tdMedias = response["data"]["medias"] as IDictionary;
+                    StateController.Instance.GetMediasSchedule().Clear();
+                    foreach (var item in tdMedias.Keys)
+                    {
+                        IDictionary I_Clip = tdMedias[item] as IDictionary;
+                        StateController.Instance.GetMediasSchedule().Add(I_Clip["id"].ToString());
+
+
+                    }
+                    //    Debug.Log(response["data"]["schedule"]["mediasIdList"].Count);
+
+                    int i = 0;
+                    foreach (string VARIABLE in tdMediasIdList.Keys)
+                    {
+                        IDictionary ItemClip = tdMedias[tdMediasIdList[VARIABLE].ToString()] as IDictionary;
+                        ItemDataschedule newDataschedule = new ItemDataschedule
+                        {
+                            number = i,
+                            TimeStart = VARIABLE,
+                            id = tdMediasIdList[VARIABLE].ToString(),
+                            duration = ItemClip["duration"].ToString(),
+                            PathLoad = ItemClip["path"].ToString(),
+                            PathLocal = null,
+                            isLocal = false,
+
+                        };
+                        DataSchedule.Instance.addItemDataSchedule(newDataschedule);
+                        i++;
+                        // Debug.Log(VARIABLE + "   " + tdMediasIdList[VARIABLE] + "   " + ItemClip["path"]);
+                    }
+                    //  foreach (ItemDataschedule itemDataschedule in DataSchedule.Instance.GetDataschedules())
+                    //  {
+                    //      string path = Application.persistentDataPath + "/" + itemDataschedule.id.ToString() + ".mp4";
+                    //      if (File.Exists(path))
+                    //      {
+                    //          itemDataschedule.PathLocal = path;
+                    //      }
+                    //  }
+
+                    // DataSchedule.Instance.PrintDataSchedule();
+
+                    StateController.Instance.SetAction();
+
+                    StateController.Instance.Canvas.SetActive(false);
+                    StateController.Instance.SetCurrentClip(-1);
+                    StateController.Instance.SetIsFirstDowload(true);
+                    //StateController.Instance.PrepareMediasList();
+
+                    StateController.Instance.StartSelectNumberClip();
+                    // StateController.Instance.SetSelectedClip(true);
+                    //  StateController.Instance.StartDowloadMoive();
+                }
+                else
+                {
+                    StateController.Instance.StopPlayer();
+                    StateController.Instance.SetAction();
+                    StateController.Instance.Canvas.SetActive(false);
+                }
+
+
+            }
+            else
+            {
+                Debug.Log("No");
+            }
+        }
+        else
+        {
+
+        }
+    }
+    public string ShowNetworkInterfaces()
+    {
+
+        NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+        string mac = null;
+        foreach (NetworkInterface adapter in nics)
+        {
+
+            if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+            {
+                PhysicalAddress address = adapter.GetPhysicalAddress();
+                //  Debug.Log("Adapter=" + adapter.NetworkInterfaceType);
+
+                byte[] bytes = address.GetAddressBytes();
+
+
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    mac = string.Concat(mac + (string.Format("{0}", bytes[i].ToString("X2"))));
+                    if (i != bytes.Length - 1)
+                    {
+                        mac = string.Concat(mac + ":");
+                    }
+                }
+                break;
+            }
+
+
+        }
+        // Debug.Log("MAC=  " + mac);
+        return mac;
     }
 }

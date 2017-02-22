@@ -731,6 +731,7 @@ public class UniversalMediaPlayer : MonoBehaviour, IMediaListener, IPlayerPrepar
             return;
 
         _mediaPlayer.Stop(clearVideoTexture);
+        Debug.Log("STOP");
 
         if (_mediaPlayerLoop != null)
             _mediaPlayerLoop.Stop(clearVideoTexture);
