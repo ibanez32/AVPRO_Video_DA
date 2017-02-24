@@ -66,7 +66,8 @@ public class FB_Controller : MonoBehaviour {
                     if (dict[key].ToString() == "DO")
                     {
                         Debug.Log("DO");
-                        StateController.Instance.ChangeState(Mark.GetSchedule);
+                        //StateController.Instance.ChangeState(Mark.GetSchedule);
+                        StateControllerAVPro.Instance.ChangeState(Mark.GetSchedule);
                     }
                 }
                 DoDebug(key + " = " + dict[key].ToString());
@@ -176,7 +177,8 @@ public class FB_Controller : MonoBehaviour {
         // Unnecessarily skips a frame, really, unnecessary.
         yield return null;
        // action.GetValue();
-        StateController.Instance.StartController();
+        //StateController.Instance.StartController();
+        StateControllerAVPro.Instance.StartController();
         
    
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -10,6 +11,7 @@ using UGS;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class StateController : SingletonBehaviour<StateController>
 {
@@ -38,12 +40,13 @@ public class StateController : SingletonBehaviour<StateController>
     private string _absolutPath;
     private bool isFirstDowloadClip;
     private WaitForSeconds waitForSeconds;
-
+    private WaitForSeconds waitForSecondsGC;
     private bool StopDowloadMoive;
     private bool isDowloadMovie;
     private bool isWWW;
     private bool isDeleteMovie;
     private bool SelectedClip;
+    
     // Use this for initialization
     void Start()
     {
@@ -52,12 +55,14 @@ public class StateController : SingletonBehaviour<StateController>
         StopDowloadMoive = false;
         isDowloadMovie = false;
         waitForSeconds = new WaitForSeconds(.01f);
+        waitForSecondsGC=new WaitForSeconds(60f);
         isFirstDowloadClip = false;
         mediasSchedule = new List<string>();
         saved_medias = new List<string>();
         prepare_medias = new List<string>();
         delete_medias = new List<string>();
         saving_medias = new List<string>();
+        //StartCoroutine(_CoroutinaGC());
     }
 
     // Update is called once per frame
@@ -68,6 +73,10 @@ public class StateController : SingletonBehaviour<StateController>
         {
             Application.Quit();
         }
+        //if (Time.frameCount % 30 == 0)
+        //{
+        //    System.GC.Collect();
+        //}
         //-------Select time interval
 
         //-------END Select time interval
@@ -191,6 +200,15 @@ public class StateController : SingletonBehaviour<StateController>
             
         }
     }
+
+    IEnumerator _CoroutinaGC()
+    {
+        GC.Collect();
+        Debug.Log("+++++++++++GC");
+
+        yield return waitForSecondsGC;
+        StartCoroutine(_CoroutinaGC());
+    }
     IEnumerator _CoroutinaSelectNUmberClip()
     {
       
@@ -236,11 +254,12 @@ public class StateController : SingletonBehaviour<StateController>
                             {
                                 pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
                                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
-                                ControllerVP.ReplacePlayVideo(pathLoad, offset,true);
+                               ControllerVP.ReplacePlayVideo(pathLoad, offset,true);
                             }
                             
                             
                             Debug.Log("Path" + pathLoad);
+                           
                           //  Debug.Log("offset" + offset);
                         }
                        
@@ -445,7 +464,7 @@ public class StateController : SingletonBehaviour<StateController>
                 string pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
                 int offset = mSec - Int32.Parse(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].TimeStart);
-                ControllerVP.ReplacePlayVideo(pathLoad, offset,false);
+                //ControllerVP.ReplacePlayVideo(pathLoad, offset,false);
             }
             
         }
@@ -471,36 +490,40 @@ public class StateController : SingletonBehaviour<StateController>
 
     public void CheckContinueDowloadMoive()
     {
-      //  Debug.Log("Start CheckContinueDowloadMoive");
+       Debug.Log("Start CheckContinueDowloadMoive");
         if (!StopDowloadMoive)
         {
-            //DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal = _absolutPath;
-            DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal =DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id + ".mp4";
-            saving_medias.Add(DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id);
-            string str = JsonMapper.ToJson(saving_medias);
-            WriteStringToFile(str, "SavedMediaList");
             
-            foreach (ItemDataschedule itemDataschedule in DataSchedule.Instance.GetDataschedules())
-            {
-                if (itemDataschedule.id == DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id)
-                {
-                    //itemDataschedule.PathLocal = _absolutPath;
-                    itemDataschedule.PathLocal = itemDataschedule.id + ".mp4";
-                }
-            }
-         //   Debug.Log("Point_1");
+          
+                //DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal = _absolutPath;
+                DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].PathLocal = DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id + ".mp4";
+                saving_medias.Add(DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id);
+                string str = JsonMapper.ToJson(saving_medias);
+                WriteStringToFile(str, "SavedMediaList");
 
-            if (ControllerVP._mediaPlayer.IsPlaying && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
-            {
-               // Debug.Log("Point_2");
-                DateTime localDate = DateTime.Now;
-                int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
-               string pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
-                DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
-               
-                int offset = mSec - Int32.Parse(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].TimeStart);
-                ControllerVP.ReplacePlayVideo(pathLoad, offset,false);
-            }
+                foreach (ItemDataschedule itemDataschedule in DataSchedule.Instance.GetDataschedules())
+                {
+                    if (itemDataschedule.id == DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id)
+                    {
+                        //itemDataschedule.PathLocal = _absolutPath;
+                        itemDataschedule.PathLocal = itemDataschedule.id + ".mp4";
+                    }
+                }
+                //   Debug.Log("Point_1");
+
+                if (ControllerVP._mediaPlayer.IsPlaying && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
+                {
+                    // Debug.Log("Point_2");
+                    DateTime localDate = DateTime.Now;
+                    int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
+                    string pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
+                    DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
+
+                    int offset = mSec - Int32.Parse(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].TimeStart);
+                    //ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+                }
+       
+            
             
             numberDowloadClip++;
             numberCurrentDowloadClip++;
@@ -557,9 +580,12 @@ public class StateController : SingletonBehaviour<StateController>
 
     public void CheckContinuewritingMovie()
     {
+        Debug.Log("Start CheckContinuewritingMovie");
         if (!StopDowloadMoive)
         {
             StartCoroutine(_CoroutineWritingMovi());
+         
+             
         }
         else
         {
@@ -599,8 +625,11 @@ public class StateController : SingletonBehaviour<StateController>
         if (www_test.error==null)
         {
             isWWW = false;
+          
+            
         Debug.Log("Finish1 Dowload");
         CheckContinuewritingMovie();
+           // CheckContinueDowloadMoive();
         }
         else
         {
@@ -608,6 +637,7 @@ public class StateController : SingletonBehaviour<StateController>
             if (StopDowloadMoive)
             {
                CheckContinuewritingMovie();
+               // CheckContinueDowloadMoive();
             }
             else
             {
@@ -621,33 +651,62 @@ public class StateController : SingletonBehaviour<StateController>
 
     IEnumerator _CoroutineWritingMovi()
     {
-        Debug.Log("Start Writing");
-        if (filestream!=null&& filestream.CanWrite)
-        {
-            filestream.Close();
-        }
-        if (stream != null && stream.CanRead)
-        {
-            stream.Close();
-        }
        
-        totalDownloaded = 0;
-        byte[] buffer = new byte[1024 * 1024];
-        while (true)
-        {
-            try
-            {
-                filestream = new FileStream(_absolutPath, FileMode.Create);
-                
-                break;
-            }
-            catch (Exception )
-            {
-                
-                
-            }
-            
-        }
+       Debug.Log("Start Writing");
+    
+       WeakReference wrefFileStream = null;
+       WeakReference wrefMemoryStream = null;
+       WeakReference wrefWWW = null;
+       totalDownloaded = 0;
+       byte[] buffer = new byte[16*1024 * 1024];
+       while (true)
+       {
+           try
+           {
+               filestream = new FileStream(_absolutPath, FileMode.Create);
+               
+               break;
+           }
+           catch (Exception )
+           {
+               
+               
+           }
+           
+       }
+       using (Stream ms = new MemoryStream(www_test.bytes))
+       {
+           int read;
+           while ((read = ms.Read(buffer, 0, buffer.Length)) > 0)
+           {
+               filestream.Write(buffer, 0, read);
+               yield return waitForSeconds;
+               if (StopDowloadMoive)
+               {
+                   break;
+               }
+           }
+           wrefMemoryStream=new WeakReference(ms);
+       }
+     filestream.Flush();
+       filestream.Close();
+       totalDownloaded = 0;
+        buffer = null;
+       wrefFileStream=new WeakReference(filestream);
+       
+       _absolutPath = null;
+        filestream = null;
+        wrefWWW=new WeakReference(www_test.bytes);
+        www_test = null;
+        www_test.Dispose();
+       System.GC.Collect();
+       System.GC.WaitForPendingFinalizers();
+       System.GC.Collect();
+       
+      CheckContinueDowloadMoive();
+
+
+
      // while (true)
      // {
      //     try
@@ -713,19 +772,7 @@ public class StateController : SingletonBehaviour<StateController>
       //     // Debug.Log("part=" + part);
       //  
       //  }
-      using (Stream ms = new MemoryStream(www_test.bytes))
-      {
-          int read;
-          while ((read = ms.Read(buffer, 0, buffer.Length)) > 0)
-          {
-              filestream.Write(buffer, 0, read);
-              yield return waitForSeconds;
-              if (StopDowloadMoive)
-              {
-                  break;
-              }
-          }
-      }
+     
         
         
       // filestream = new FileStream(_absolutPath, FileMode.Create);
@@ -743,14 +790,14 @@ public class StateController : SingletonBehaviour<StateController>
       //     yield return waitForSeconds;
       // }
         //filestream.Flush();
-        filestream.Close();
+       
        // stream.Flush();
        // stream.Close();
        
-        totalDownloaded = 0;
+      
        // yield return waitForSeconds;
       //  Debug.Log("Write Complete1");
-        CheckContinueDowloadMoive();
+       
 
 
     }

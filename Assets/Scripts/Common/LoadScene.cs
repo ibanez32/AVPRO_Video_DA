@@ -43,7 +43,7 @@ public class LoadScene : MonoBehaviour
                 splash.SetActive(false);
                 pin_overlay.SetActive(true);
                 PIN_text.text = "PIN Ok!";
-                SceneManager.LoadScene("DA_player");
+                SceneManager.LoadScene("Demo_imGui");
                 
             }
             if (response.ContainsKey("errNo") && response["errNo"].AsInt() == 0 && response.ContainsKey("code"))
