@@ -783,7 +783,8 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
         string _absolutPath = "";
         //_absolutPath = Application.persistentDataPath + "/" + id + ".mp4";
         //_absolutPath = PathForDocumentsFile(id) + ".mp4";
-        _absolutPath = Application.dataPath + "/StreamingAssets/" + id + ".mp4";
+       // _absolutPath = Application.dataPath + "/StreamingAssets/" + id + ".mp4";
+        _absolutPath = Application.streamingAssetsPath + "/" + id + ".mp4";
         // Debug.Log("PATH= "+_absolutPath);
         return _absolutPath;
     }
@@ -793,8 +794,8 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
     public string ReadStringFromFile(string filename)
     {
 #if !WEB_BUILD
-        string path = PathForDocumentsFile(filename);
-
+        //string path = PathForDocumentsFile(filename);
+        string path = Application.streamingAssetsPath + "/" + filename;
         if (File.Exists(path))
         {
             FileStream file = new FileStream(path, FileMode.Open, FileAccess.Read);
@@ -820,7 +821,8 @@ return null;
     public void WriteStringToFile(string str, string filename)
     {
 #if !WEB_BUILD
-        string path = PathForDocumentsFile(filename);
+       // string path = PathForDocumentsFile(filename);
+        string path =Application.streamingAssetsPath+"/"+filename;
         if (File.Exists(path))
         {
             //File.Delete(path);
