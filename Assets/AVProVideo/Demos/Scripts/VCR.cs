@@ -28,7 +28,8 @@ namespace RenderHeads.Media.AVProVideo.Demos
 		public Toggle		_AutoStartToggle;
 		public Toggle		_MuteToggle;
 
-		public string[] _videoFiles = { "BigBuckBunny_720p30.mp4", "SampleSphere.mp4" };
+		public string[] _videoFiles ;
+	    private bool seekIs;
 
 #if false
 		public void OnOpenVideoFile()
@@ -55,7 +56,8 @@ namespace RenderHeads.Media.AVProVideo.Demos
 			}
 			else
 			{
-				_mediaPlayer.OpenVideoFromFile(MediaPlayer.FileLocation.RelativeToStreamingAssetsFolder, _mediaPlayer.m_VideoPath, _AutoStartToggle.isOn);
+			    _videoSeekSlider.value = 0;
+				_mediaPlayer.OpenVideoFromFile(MediaPlayer.FileLocation.AbsolutePathOrURL, _mediaPlayer.m_VideoPath, _AutoStartToggle.isOn);
 //				SetButtonEnabled( "PlayButton", !_mediaPlayer.m_AutoStart );
 //				SetButtonEnabled( "PauseButton", _mediaPlayer.m_AutoStart );
 			}
@@ -84,6 +86,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
 		{
 			if( _mediaPlayer )
 			{
+                
 				_mediaPlayer.Control.Play();
 //				SetButtonEnabled( "PlayButton", false );
 //				SetButtonEnabled( "PauseButton", true );
@@ -93,6 +96,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
 		{
 			if( _mediaPlayer )
 			{
+                
 				_mediaPlayer.Control.Pause();
 //				SetButtonEnabled( "PauseButton", false );
 //				SetButtonEnabled( "PlayButton", true );
@@ -101,9 +105,10 @@ namespace RenderHeads.Media.AVProVideo.Demos
 
 		public void OnVideoSeekSlider()
 		{
+            Debug.Log("Slaider");
 			if (_mediaPlayer && _videoSeekSlider && _videoSeekSlider.value != _setVideoSeekSliderValue)
 			{
-				_mediaPlayer.Control.Seek(_videoSeekSlider.value * _mediaPlayer.Info.GetDurationMs());
+				_mediaPlayer.Control.SeekFast(_videoSeekSlider.value * _mediaPlayer.Info.GetDurationMs());
 			}
 		}
 		public void OnVideoSliderDown()
@@ -113,6 +118,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
 				_wasPlayingOnScrub = _mediaPlayer.Control.IsPlaying();
 				if( _wasPlayingOnScrub )
 				{
+                    Debug.Log("PAuse");
 					_mediaPlayer.Control.Pause();
 //					SetButtonEnabled( "PauseButton", false );
 //					SetButtonEnabled( "PlayButton", true );
@@ -124,6 +130,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
 		{
 			if( _mediaPlayer && _wasPlayingOnScrub )
 			{
+                Debug.Log("Play");
 				_mediaPlayer.Control.Play();
 				_wasPlayingOnScrub = false;
 
@@ -207,11 +214,22 @@ namespace RenderHeads.Media.AVProVideo.Demos
 		{
 			if (_mediaPlayer && _mediaPlayer.Info != null && _mediaPlayer.Info.GetDurationMs() > 0f)
 			{
+			    if (seekIs)
+			    {
+                    _videoSeekSlider.value = 0.9f;
+			        seekIs = false;
+			    }
+               
 				float time = _mediaPlayer.Control.GetCurrentTimeMs();
 				float d = time / _mediaPlayer.Info.GetDurationMs();
 				_setVideoSeekSliderValue = d;
 				_videoSeekSlider.value = d;
+                if (Input.GetKeyDown("space"))
+                {
+                    _videoSeekSlider.value += 0.1f;
+                }
 			}
+            
 		}
 
 		// Callback function to handle events
@@ -224,6 +242,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
 				case MediaPlayerEvent.EventType.Started:
 				break;
 				case MediaPlayerEvent.EventType.FirstFrameReady:
+			        seekIs = true;
 				break;
 				case MediaPlayerEvent.EventType.FinishedPlaying:
 				break;

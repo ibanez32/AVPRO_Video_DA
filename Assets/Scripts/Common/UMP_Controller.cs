@@ -11,7 +11,7 @@ public class UMP_Controller : MonoBehaviour
     {
         if (_mediaPlayer != null)
         {
-            _mediaPlayer.AddPlayingEvent(OnPlayerPlaying);
+           // _mediaPlayer.AddPlayingEvent(OnPlayerPlaying);
           //  _mediaPlayer.AddTimeChangedEvent(OnPlayerTimeChanged);
           //  _mediaPlayer.AddPositionChangedEvent(OnPlayerPositionChanged);
           //  _mediaPlayer.AddSnapshotTakenEvent(OnPlayerSnapshotTaken);
@@ -30,17 +30,21 @@ public class UMP_Controller : MonoBehaviour
       
 
     }
+
+    
     public void LoadVideo(string filePath, bool url = false)
     {
         if (url)
         {
             _mediaPlayer.Path = filePath;
             _mediaPlayer.Play();
+            OnPlayerPlaying();
         }
         else
         {
             _mediaPlayer.Path = "file:///" + filePath;
             _mediaPlayer.Play();
+            OnPlayerPlaying();
         }
     }
     public void Play()
@@ -75,9 +79,9 @@ public class UMP_Controller : MonoBehaviour
         float duration = (float) (Int32.Parse(Item.duration)*1000);
         Debug.Log("delta=" +delta);
         Debug.Log("Duration=" +duration);
-        Offset = delta /duration;
-        Debug.Log("OnPlayerPlaying="+Offset);
-        _mediaPlayer.Position=Offset;
+       float  Offs = delta /duration;
+       Debug.Log("OnPlayerPlaying=" + Offs);
+       _mediaPlayer.Position = Offs;
       if (StateController.Instance.GetIsFirstDowloadClip())
       {
           if (!StateController.Instance.GetIsDowloadMovie())

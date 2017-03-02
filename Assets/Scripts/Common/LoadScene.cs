@@ -11,6 +11,7 @@ public class LoadScene : MonoBehaviour
     public GameObject splash;
     public GameObject pin_overlay;
     public Text PIN_text;
+    public string Scene;
 	// Use this for initialization
 	IEnumerator Start () {
         splash.SetActive(true);
@@ -43,7 +44,7 @@ public class LoadScene : MonoBehaviour
                 splash.SetActive(false);
                 pin_overlay.SetActive(true);
                 PIN_text.text = "PIN Ok!";
-                SceneManager.LoadScene("Demo_imGui");
+                SceneManager.LoadScene(Scene);
                 
             }
             if (response.ContainsKey("errNo") && response["errNo"].AsInt() == 0 && response.ContainsKey("code"))
@@ -102,7 +103,7 @@ public class LoadScene : MonoBehaviour
 
 
         }
-        //   Debug.Log("MAC=  " + mac);
+          Debug.Log("MAC=  " + mac);
         return mac;
     }
     

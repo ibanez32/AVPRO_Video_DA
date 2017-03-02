@@ -1,24 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using LitJsonSrc;
-using RenderHeads.Media.AVProVideo;
 using RenderHeads.Media.AVProVideo.Demos;
 using UGS;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
-public class StateController : SingletonBehaviour<StateController>
+public class StateControllerVLC : SingletonBehaviour<StateControllerVLC>
 {
-    public FB_Controller_UMP FB_datebase;
-    public UMP_Controller ControllerVP;
-    public GameObject Canvas;
-    public Text PIN_text;
+    public FB_Controller FB_datebase;
+    public VLC_Controller ControllerVP;
+  //  public GameObject Canvas;
+  //  public Text PIN_text;
     // private Context ContextState;
     private int CurrentNumberClip;
     //Dowload Movi
@@ -46,7 +43,7 @@ public class StateController : SingletonBehaviour<StateController>
     private bool isWWW;
     private bool isDeleteMovie;
     private bool SelectedClip;
-    private int currentTime;
+
     // Use this for initialization
     void Start()
     {
@@ -109,8 +106,6 @@ public class StateController : SingletonBehaviour<StateController>
     }
     public void StartController()
     {
-
-
         Debug.Log("Start");
         numberDowloadClip = 0;
 
@@ -189,13 +184,15 @@ public class StateController : SingletonBehaviour<StateController>
                 {
                     pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                     DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
-                    ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+                   // ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+                    ControllerVP.OnOpenVideoFile(pathLoad);
                 }
                 else
                 {
                     pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
                     DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
-                    ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
+                   // ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
+                    ControllerVP.OnOpenVideoFile(pathLoad);
                 }
 
 
@@ -221,23 +218,11 @@ public class StateController : SingletonBehaviour<StateController>
 
         for (; ; )
         {
-            DateTime localDate = DateTime.Now;
-            int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
-            // Debug.Log("Current="+currentTime);
-            // Debug.Log("mSec=" + mSec);
-            // if (mSec>currentTime)
-            // {
-            //     Debug.Log("GO");
-            //     currentTime = mSec;
-            // }
-            // else
-            // {
-            //     //ChangeState(Mark.GetSchedule);
-            //     Debug.Log("Reload");
-            // }
+
             if (DataSchedule.Instance.GetDataschedules().Count > 0)
             {
-
+                DateTime localDate = DateTime.Now;
+                int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
                 var Item = DataSchedule.Instance.GetDataschedules()
                 .Find(
                     elm =>
@@ -251,10 +236,10 @@ public class StateController : SingletonBehaviour<StateController>
                 }
                 if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) >= 0 && DataSchedule.Instance.GetDataschedules().IndexOf(Item) != CurrentNumberClip)
                 {
-                    // Debug.Log("Enter");
+                    Debug.Log("Enter");
                     if (CurrentNumberClip == -1)
                     {
-                        //  Debug.Log("Enter2");
+                        Debug.Log("Enter2");
                         //SetIsFirstDowload(true);
                         if (!isDowloadMovie)
                         {
@@ -267,13 +252,15 @@ public class StateController : SingletonBehaviour<StateController>
                             {
                                 pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
-                                ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+                               // ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+                                ControllerVP.OnOpenVideoFile(pathLoad);
                             }
                             else
                             {
                                 pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
                                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
-                                ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
+                               // ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
+                                ControllerVP.OnOpenVideoFile(pathLoad);
                             }
 
 
@@ -292,14 +279,16 @@ public class StateController : SingletonBehaviour<StateController>
                         {
                             pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                             DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
-                            ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+                            //ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+                            ControllerVP.OnOpenVideoFile(pathLoad);
 
                         }
                         else
                         {
                             pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
                             DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
-                            ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
+                            //ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
+                            ControllerVP.OnOpenVideoFile(pathLoad);
 
                         }
 
@@ -312,7 +301,7 @@ public class StateController : SingletonBehaviour<StateController>
                 }
                 if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) < 0 && isFirstDowloadClip)
                 {
-                    if (ControllerVP._mediaPlayer.IsPlaying)
+                    if (ControllerVP._mediaPlayer.Control.IsPlaying())
                     {
                         StopPlayer();
                     }
@@ -475,7 +464,7 @@ public class StateController : SingletonBehaviour<StateController>
         else
         {
             Debug.Log("NO DOWLOAD CLIP");
-            if (ControllerVP._mediaPlayer.IsPlaying && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
+            if (ControllerVP._mediaPlayer.Control.IsPlaying() && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
             {
                 Debug.Log("Point_2");
                 DateTime localDate = DateTime.Now;
@@ -483,7 +472,7 @@ public class StateController : SingletonBehaviour<StateController>
                 string pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
                 int offset = mSec - Int32.Parse(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].TimeStart);
-                ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+                //ControllerVP.ReplacePlayVideo(pathLoad, offset,false);
             }
 
         }
@@ -530,7 +519,7 @@ public class StateController : SingletonBehaviour<StateController>
             }
             //   Debug.Log("Point_1");
 
-            if (ControllerVP._mediaPlayer.IsPlaying && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
+            if (ControllerVP._mediaPlayer.Control.IsPlaying() && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
             {
                 // Debug.Log("Point_2");
                 DateTime localDate = DateTime.Now;
@@ -539,7 +528,7 @@ public class StateController : SingletonBehaviour<StateController>
                 DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
 
                 int offset = mSec - Int32.Parse(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].TimeStart);
-                ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+                //ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
             }
 
 
@@ -673,37 +662,57 @@ public class StateController : SingletonBehaviour<StateController>
 
         Debug.Log("Start Writing");
 
+        // WeakReference wrefFileStream = null;
+        // WeakReference wrefMemoryStream = null;
+        // WeakReference wrefWWW = null;
+        // totalDownloaded = 0;
         byte[] buffer = new byte[16 * 1024 * 1024];
-
-        using (Stream ms = new MemoryStream(www_test.bytes))
+        while (true)
         {
-
-            www_test.Dispose();
-            www_test = null;
-            System.GC.Collect();
-            System.GC.WaitForPendingFinalizers();
-            System.GC.Collect();
-            using (FileStream fs = new FileStream(_absolutPath, FileMode.Create))
+            try
             {
-                int read;
-                while ((read = ms.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    fs.Write(buffer, 0, read);
-                    yield return waitForSeconds;
-                    if (StopDowloadMoive)
-                    {
-                        break;
-                    }
-                }
+                filestream = new FileStream(_absolutPath, FileMode.Create);
+
+                break;
+            }
+            catch (Exception)
+            {
+
+
             }
 
-
         }
-
+        // using (Stream ms = new MemoryStream(www_test.bytes))
+        // {
+        Stream ms = new MemoryStream(www_test.bytes);
+        www_test.Dispose();
+        www_test = null;
+        System.GC.Collect();
+        System.GC.WaitForPendingFinalizers();
+        System.GC.Collect();
+        int read;
+        while ((read = ms.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            filestream.Write(buffer, 0, read);
+            yield return waitForSeconds;
+            if (StopDowloadMoive)
+            {
+                break;
+            }
+        }
+        // wrefMemoryStream = new WeakReference(ms);
+        //  }
+        filestream.Flush();
+        filestream.Close();
+        totalDownloaded = 0;
         buffer = null;
+        //wrefFileStream = new WeakReference(filestream);
 
         _absolutPath = null;
-
+        filestream = null;
+        // wrefWWW = new WeakReference(www_test.bytes);
+        //www_test = null;
+        // www_test.Dispose();
         System.GC.Collect();
         System.GC.WaitForPendingFinalizers();
         System.GC.Collect();
@@ -712,7 +721,96 @@ public class StateController : SingletonBehaviour<StateController>
 
 
 
+        // while (true)
+        // {
+        //     try
+        //     {
+        //         stream = new MemoryStream(www_test.bytes);
+        //
+        //         break;
+        //     }
+        //     catch (Exception)
+        //     {
+        //
+        //
+        //     }
+        //
+        // }
 
+        //  if (www_test.bytes.Length%buffer.Length==0)
+        //  {
+        //      int number = (int)Math.Truncate((float)www_test.bytes.Length / (float)buffer.Length);
+        //      for (int i = 0; i < number; i++)
+        //      {
+        //          int k = 0;
+        //          for (int j = i * buffer.Length; j < (i + 1) * buffer.Length; j++)
+        //          {
+        //              buffer[k] = www_test.bytes[j];
+        //              k++;
+        //          }
+        //          filestream.Write(buffer, 0, buffer.Length);
+        //          yield return waitForSeconds;
+        //      }
+        //    // Debug.Log("buffer="+buffer.Length);
+        //    // Debug.Log("www=" + www_test.bytes.Length);
+        //    // Debug.Log("number=" + www_test.bytes.Length / buffer.Length);
+        //  }
+        //  else
+        //  {
+        //      int number=(int)Math.Truncate((float)www_test.bytes.Length /(float) buffer.Length);
+        //      for (int i = 0; i < number; i++)
+        //      {
+        //          int k = 0;
+        //          for (int j = i * buffer.Length; j < (i+1) * buffer.Length; j++)
+        //          {
+        //              buffer[k] = www_test.bytes[j];
+        //              k++;
+        //          }
+        //          filestream.Write(buffer, 0, buffer.Length);
+        //          yield return waitForSeconds;
+        //      }
+        //      buffer = new byte[www_test.bytes.Length - number * buffer.Length];
+        //      int t = 0;
+        //      for (int i = number * buffer.Length; i < www_test.bytes.Length; i++)
+        //      {
+        //           buffer[t] = www_test.bytes[i];
+        //          t++;
+        //      }
+        //      filestream.Write(buffer, 0, buffer.Length);
+        //      yield return waitForSeconds;
+        //     // Debug.Log("buffer="+buffer.Length);
+        //     // Debug.Log("www=" + www_test.bytes.Length);
+        //     // Debug.Log("number=" + Math.Truncate((float)www_test.bytes.Length /(float) buffer.Length));
+        //     // int part = www_test.bytes.Length -
+        //     //           (int) Math.Truncate((float) www_test.bytes.Length/(float) buffer.Length)*buffer.Length;
+        //     // Debug.Log("part=" + part);
+        //  
+        //  }
+
+
+
+        // filestream = new FileStream(_absolutPath, FileMode.Create);
+        // stream = new MemoryStream(www_test.bytes);
+        // totalDownloaded = 0;
+        // byte[] buffer = new byte[1024 * 1024];
+        // while (totalDownloaded < www_test.bytes.Length)
+        // {
+        //     
+        //     int read = stream.Read(buffer, 0, buffer.Length);
+        //     totalDownloaded += read;
+        //     filestream.Write(buffer, 0, read);
+        //     // int percent = (int)((totalDownloaded / www_test.bytes.Length) * 100);
+        //     //  Debug.Log("Downloaded: " + totalDownloaded + " of " + www_test.bytes.Length + " bytes ..." + percent);
+        //     yield return waitForSeconds;
+        // }
+        //filestream.Flush();
+
+        // stream.Flush();
+        // stream.Close();
+
+
+        // yield return waitForSeconds;
+        //  Debug.Log("Write Complete1");
 
 
 
@@ -927,7 +1025,7 @@ return null;
 
                     SetAction();
 
-                    Canvas.SetActive(false);
+                    //Canvas.SetActive(false);
                     SetCurrentClip(-1);
                     SetIsFirstDowload(true);
                     //PrepareMediasList();
@@ -935,14 +1033,12 @@ return null;
                     StartSelectNumberClip();
                     // SetSelectedClip(true);
                     //  StartDowloadMoive();
-                    DateTime localDate = DateTime.Now;
-                    currentTime = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
                 }
                 else
                 {
                     StopPlayer();
                     SetAction();
-                    Canvas.SetActive(false);
+                    //Canvas.SetActive(false);
                 }
 
 

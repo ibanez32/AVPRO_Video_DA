@@ -13,10 +13,10 @@ using System.Collections;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 
-public class StateController : SingletonBehaviour<StateController>
+public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
 {
-    public FB_Controller_UMP FB_datebase;
-    public UMP_Controller ControllerVP;
+    public FB_Controller FB_datebase;
+    public SimpleController ControllerVP;
     public GameObject Canvas;
     public Text PIN_text;
     // private Context ContextState;
@@ -109,8 +109,8 @@ public class StateController : SingletonBehaviour<StateController>
     }
     public void StartController()
     {
-
-
+       
+       
         Debug.Log("Start");
         numberDowloadClip = 0;
 
@@ -119,7 +119,7 @@ public class StateController : SingletonBehaviour<StateController>
         LoadShedule();
 
     }
-
+   
     public void StopPlayer()
     {
         ControllerVP._mediaPlayer.Stop();
@@ -223,21 +223,21 @@ public class StateController : SingletonBehaviour<StateController>
         {
             DateTime localDate = DateTime.Now;
             int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
-            // Debug.Log("Current="+currentTime);
-            // Debug.Log("mSec=" + mSec);
-            // if (mSec>currentTime)
-            // {
-            //     Debug.Log("GO");
-            //     currentTime = mSec;
-            // }
-            // else
-            // {
-            //     //ChangeState(Mark.GetSchedule);
-            //     Debug.Log("Reload");
-            // }
+          // Debug.Log("Current="+currentTime);
+          // Debug.Log("mSec=" + mSec);
+          // if (mSec>currentTime)
+          // {
+          //     Debug.Log("GO");
+          //     currentTime = mSec;
+          // }
+          // else
+          // {
+          //     //ChangeState(Mark.GetSchedule);
+          //     Debug.Log("Reload");
+          // }
             if (DataSchedule.Instance.GetDataschedules().Count > 0)
             {
-
+                
                 var Item = DataSchedule.Instance.GetDataschedules()
                 .Find(
                     elm =>
@@ -251,10 +251,10 @@ public class StateController : SingletonBehaviour<StateController>
                 }
                 if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) >= 0 && DataSchedule.Instance.GetDataschedules().IndexOf(Item) != CurrentNumberClip)
                 {
-                    // Debug.Log("Enter");
+                   // Debug.Log("Enter");
                     if (CurrentNumberClip == -1)
                     {
-                        //  Debug.Log("Enter2");
+                      //  Debug.Log("Enter2");
                         //SetIsFirstDowload(true);
                         if (!isDowloadMovie)
                         {
@@ -312,7 +312,7 @@ public class StateController : SingletonBehaviour<StateController>
                 }
                 if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) < 0 && isFirstDowloadClip)
                 {
-                    if (ControllerVP._mediaPlayer.IsPlaying)
+                    if (ControllerVP._mediaPlayer.Control.IsPlaying())
                     {
                         StopPlayer();
                     }
@@ -475,7 +475,7 @@ public class StateController : SingletonBehaviour<StateController>
         else
         {
             Debug.Log("NO DOWLOAD CLIP");
-            if (ControllerVP._mediaPlayer.IsPlaying && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
+            if (ControllerVP._mediaPlayer.Control.IsPlaying() && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
             {
                 Debug.Log("Point_2");
                 DateTime localDate = DateTime.Now;
@@ -530,7 +530,7 @@ public class StateController : SingletonBehaviour<StateController>
             }
             //   Debug.Log("Point_1");
 
-            if (ControllerVP._mediaPlayer.IsPlaying && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
+            if (ControllerVP._mediaPlayer.Control.IsPlaying() && !DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal && DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal != null)
             {
                 // Debug.Log("Point_2");
                 DateTime localDate = DateTime.Now;
@@ -674,7 +674,7 @@ public class StateController : SingletonBehaviour<StateController>
         Debug.Log("Start Writing");
 
         byte[] buffer = new byte[16 * 1024 * 1024];
-
+        
         using (Stream ms = new MemoryStream(www_test.bytes))
         {
 
@@ -712,7 +712,7 @@ public class StateController : SingletonBehaviour<StateController>
 
 
 
-
+       
 
 
 

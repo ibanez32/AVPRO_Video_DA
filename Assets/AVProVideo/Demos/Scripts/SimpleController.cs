@@ -18,9 +18,9 @@ namespace RenderHeads.Media.AVProVideo.Demos
     /// </summary>
     public class SimpleController : MonoBehaviour
     {
-      //  public string _folder = "AVProVideoSamples/";
-      //  public string[] _filenames = new string[] { "SampleSphere.mp4", "BigBuckBunny_360p30.mp3", "BigBuckBunny_720p30.mp4" };
-      //  public string[] _streams;
+        //  public string _folder = "AVProVideoSamples/";
+        //  public string[] _filenames = new string[] { "SampleSphere.mp4", "BigBuckBunny_360p30.mp3", "BigBuckBunny_720p30.mp4" };
+        //  public string[] _streams;
         public MediaPlayer _mediaPlayer;
         public DisplayIMGUI _display;
         public GUISkin _guiSkin;
@@ -42,7 +42,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
 
             _mediaPlayer.Events.AddListener(OnMediaPlayerEvent);
 
-            
+
         }
 
         // Loader Start
@@ -51,12 +51,12 @@ namespace RenderHeads.Media.AVProVideo.Demos
 
 
 
-        public void ReplacePlayVideo(string path, int offset,bool url)
+        public void ReplacePlayVideo(string path, int offset, bool url)
         {
 
-           LoadVideo(path, url);
+            LoadVideo(path, url);
             Offset = offset;
-         
+
 
         }
 
@@ -70,41 +70,32 @@ namespace RenderHeads.Media.AVProVideo.Demos
             switch (et)
             {
                 case MediaPlayerEvent.EventType.Error:
-                  StateControllerAVPro.Instance.SetSelectedClip(true);
+
                     break;
                 case MediaPlayerEvent.EventType.ReadyToPlay:
-                    //_mediaPlayer.Control.Seek(Offset);
-                   // _mediaPlayer.Control.Play();
+
+
                     break;
                 case MediaPlayerEvent.EventType.Started:
-
-                    DateTime localDate = DateTime.Now;
-                int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
-                var Item = DataSchedule.Instance.GetDataschedules()
-                .Find(
-                    elm =>
-                        Int32.Parse(elm.TimeStart) <= mSec &&
-                        (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
-                Offset = mSec - Int32.Parse(Item.TimeStart);
-                    _mediaPlayer.Control.Seek(Offset);
-                  
 
                     break;
                 case MediaPlayerEvent.EventType.FirstFrameReady:
 
-                   // _mediaPlayer.Control.Seek(Offset);
-                if (StateControllerAVPro.Instance.GetIsFirstDowloadClip())
-                {
-                    if (!StateControllerAVPro.Instance.GetIsDowloadMovie())
-                    {
-                        StateControllerAVPro.Instance.SetstopDowloadMovie(false);
-                        StateControllerAVPro.Instance.StartDeleteClip();
-                        
-                    }
-                    
-                    StateControllerAVPro.Instance.SetIsFirstDowload(false);
-               
-                }
+
+                    _mediaPlayer.Control.Play();
+                    StartCoroutine(StartLoad());
+
+
+
+
+
+
+
+
+
+
+
+
                     break;
                 case MediaPlayerEvent.EventType.MetaDataReady:
                     GatherProperties();
@@ -131,15 +122,76 @@ namespace RenderHeads.Media.AVProVideo.Demos
                             pathLoad = DataSchedule.Instance.GetDataschedules()[StateControllerAVPro.Instance.GetCurrentClip()].PathLoad;
                         }
                         int offset = 0;
-                        ReplacePlayVideo(pathLoad, offset,false);
+                        ReplacePlayVideo(pathLoad, offset, false);
                     }
-                    
+
                     break;
             }
 
-           // AddEvent(et);
+            AddEvent(et);
         }
 
+        IEnumerator StartLoad()
+        {
+           // yield return new WaitForSeconds(1f);
+            while (true)
+            {
+                Debug.Log("NO Playing");
+                yield return null;
+                if (_mediaPlayer && _mediaPlayer.Info != null && _mediaPlayer.Info.GetDurationMs() > 0f)
+                {
+                    DateTime localDate = DateTime.Now;
+                    int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
+                    var Item = DataSchedule.Instance.GetDataschedules()
+                    .Find(
+                        elm =>
+                            Int32.Parse(elm.TimeStart) <= mSec &&
+                            (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
+                    if (Item != null)
+                    {
+                        int seek_of = mSec - Int32.Parse(Item.TimeStart);
+                        Debug.Log("offset=" + seek_of);
+                        _mediaPlayer.Control.Pause();
+                        yield return null;
+                        _mediaPlayer.Control.SeekFast(seek_of);
+                        yield return null;
+                        _mediaPlayer.Control.Play();
+                    }
+                    
+                    break;
+                    
+                }
+            }
+            //    DateTime localDate = DateTime.Now;
+            //    int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
+            //    var Item = DataSchedule.Instance.GetDataschedules()
+            //    .Find(
+            //        elm =>
+            //            Int32.Parse(elm.TimeStart) <= mSec &&
+            //            (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
+            //
+            //    int seek_of = mSec - Int32.Parse(Item.TimeStart);
+            //    Debug.Log("offset=" + seek_of);
+            //    yield return new WaitForSeconds(1f);
+            //  _mediaPlayer.Pause();
+            //   yield return new WaitForSeconds(1f);
+            //   _mediaPlayer.Control.SeekFast(seek_of);
+            //   yield return new WaitForSeconds(1f); 
+            //    _mediaPlayer.Play();
+              yield return new WaitForSeconds(30f);
+             if (StateControllerAVPro.Instance.GetIsFirstDowloadClip())
+             {
+                 if (!StateControllerAVPro.Instance.GetIsDowloadMovie())
+                 {
+                     StateControllerAVPro.Instance.SetstopDowloadMovie(false);
+                     StateControllerAVPro.Instance.StartDeleteClip();
+            
+                 }
+            
+                 StateControllerAVPro.Instance.SetIsFirstDowload(false);
+            
+             }
+        }
         private void AddEvent(MediaPlayerEvent.EventType et)
         {
             Debug.Log("[SimpleController] Event: " + et.ToString());
@@ -163,25 +215,25 @@ namespace RenderHeads.Media.AVProVideo.Demos
 
         void Update()
         {
-         //
-         //   if (!_useFading)
-         //   {
-         //       if (_display != null && _display._mediaPlayer != null && _display._mediaPlayer.Control != null)
-         //       {
-         //           _display._color = Color.white;
-         //           _display._mediaPlayer.Control.SetVolume(1f);
-         //       }
-         //   }
+            //
+            //   if (!_useFading)
+            //   {
+            //       if (_display != null && _display._mediaPlayer != null && _display._mediaPlayer.Control != null)
+            //       {
+            //           _display._color = Color.white;
+            //           _display._mediaPlayer.Control.SetVolume(1f);
+            //       }
+            //   }
 
-         //  if (_eventLog != null && _eventLog.Count > 0)
-         //  {
-         //      _eventTimer -= Time.deltaTime;
-         //      if (_eventTimer < 0f)
-         //      {
-         //          _eventLog.Dequeue();
-         //          _eventTimer = 1f;
-         //      }
-         //  }
+            //  if (_eventLog != null && _eventLog.Count > 0)
+            //  {
+            //      _eventTimer -= Time.deltaTime;
+            //      if (_eventTimer < 0f)
+            //      {
+            //          _eventLog.Dequeue();
+            //          _eventTimer = 1f;
+            //      }
+            //  }
         }
 
         private void LoadVideo(string filePath, bool url = false)
@@ -189,7 +241,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
             // Set the video file name and to load. 
             if (!url)
                 _nextVideoLocation = MediaPlayer.FileLocation.RelativeToStreamingAssetsFolder;
-               // _nextVideoLocation = MediaPlayer.FileLocation.RelativeToProjectFolder;
+            // _nextVideoLocation = MediaPlayer.FileLocation.RelativeToProjectFolder;
             else
                 _nextVideoLocation = MediaPlayer.FileLocation.AbsolutePathOrURL;
             _nextVideoPath = filePath;
@@ -207,6 +259,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
             {
                 StartCoroutine("LoadVideoWithFading");
             }
+
         }
 
         private static bool VideoIsReady(MediaPlayer mp)
@@ -279,7 +332,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
 
         void OnGUI()
         {
-          
+
             if (_mediaPlayer == null)
             {
                 return;
@@ -306,8 +359,8 @@ namespace RenderHeads.Media.AVProVideo.Demos
 
                 // Display properties
                 //GUILayout.Label("Loaded: " + _mediaPlayer.m_VideoPath);
-               // GUILayout.Label("Size: " + _width + "x" + _height + "   Duration: " + Helper.GetTimeString(_duration));
-               // GUILayout.Label("Updates: " + _mediaPlayer.TextureProducer.GetTextureFrameCount());
+                // GUILayout.Label("Size: " + _width + "x" + _height + "   Duration: " + Helper.GetTimeString(_duration));
+                // GUILayout.Label("Updates: " + _mediaPlayer.TextureProducer.GetTextureFrameCount());
 
                 //   GUILayout.Label(string.Format("Size: {0}x{1} FPS: {3} Duration: {2}ms", _width, _height, _mediaPlayer.Info.GetDurationMs(), _mediaPlayer.Info.GetVideoFrameRate().ToString("F2")));
                 // GUILayout.Label("Updates: " + _mediaPlayer.TextureProducer.GetTextureFrameCount() + "    Rate: " + _mediaPlayer.Info.GetVideoDisplayRate().ToString("F1"));
@@ -448,5 +501,5 @@ namespace RenderHeads.Media.AVProVideo.Demos
             GUILayout.EndVertical();
         }
     }
-   
+
 }
