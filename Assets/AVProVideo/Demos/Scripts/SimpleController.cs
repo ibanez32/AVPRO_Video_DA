@@ -133,7 +133,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
 
         IEnumerator StartLoad()
         {
-           // yield return new WaitForSeconds(1f);
+            // yield return new WaitForSeconds(1f);
             while (true)
             {
                 Debug.Log("NO Playing");
@@ -157,9 +157,9 @@ namespace RenderHeads.Media.AVProVideo.Demos
                         yield return null;
                         _mediaPlayer.Control.Play();
                     }
-                    
+
                     break;
-                    
+
                 }
             }
             //    DateTime localDate = DateTime.Now;
@@ -178,19 +178,19 @@ namespace RenderHeads.Media.AVProVideo.Demos
             //   _mediaPlayer.Control.SeekFast(seek_of);
             //   yield return new WaitForSeconds(1f); 
             //    _mediaPlayer.Play();
-              yield return new WaitForSeconds(30f);
-             if (StateControllerAVPro.Instance.GetIsFirstDowloadClip())
-             {
-                 if (!StateControllerAVPro.Instance.GetIsDowloadMovie())
-                 {
-                     StateControllerAVPro.Instance.SetstopDowloadMovie(false);
-                     StateControllerAVPro.Instance.StartDeleteClip();
-            
-                 }
-            
-                 StateControllerAVPro.Instance.SetIsFirstDowload(false);
-            
-             }
+           yield return new WaitForSeconds(5f);
+           if (StateControllerAVPro.Instance.GetIsFirstDowloadClip())
+           {
+               if (!StateControllerAVPro.Instance.GetIsDowloadMovie())
+               {
+                   StateControllerAVPro.Instance.SetstopDowloadMovie(false);
+                   StateControllerAVPro.Instance.StartDeleteClip();
+          
+               }
+          
+               StateControllerAVPro.Instance.SetIsFirstDowload(false);
+          
+           }
         }
         private void AddEvent(MediaPlayerEvent.EventType et)
         {

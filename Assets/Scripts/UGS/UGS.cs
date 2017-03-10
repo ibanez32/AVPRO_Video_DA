@@ -311,7 +311,7 @@ namespace UGS
             Dictionary<string, string> headers = form.headers;
             headers["device-mac"] = mac_adress;
        
-            Request = new WWW(url, null, headers);
+            Request = new WWW(url+"?type=windows", null, headers);
         }
         protected override string GetResult()
         {

@@ -14,11 +14,21 @@ public class UMP_Controller : MonoBehaviour
            // _mediaPlayer.AddPlayingEvent(OnPlayerPlaying);
           //  _mediaPlayer.AddTimeChangedEvent(OnPlayerTimeChanged);
           //  _mediaPlayer.AddPositionChangedEvent(OnPlayerPositionChanged);
-          //  _mediaPlayer.AddSnapshotTakenEvent(OnPlayerSnapshotTaken);
+          // 
+          //  _mediaPlayer.AddBufferingEvent(OnPlayerBuffering);
         }
     }
-	
-	// Update is called once per frame
+
+    private void OnPlayerBuffering(float arg0)
+    {
+        Debug.Log("OnPlayerBuffering="+arg0);
+        if (arg0==100f)
+        {
+            OnPlayerPlaying();
+        }
+    }
+
+    // Update is called once per frame
 	void Update () {
 	
 	}
@@ -37,8 +47,9 @@ public class UMP_Controller : MonoBehaviour
         if (url)
         {
             _mediaPlayer.Path = filePath;
-            _mediaPlayer.Play();
-            OnPlayerPlaying();
+           _mediaPlayer.Play();
+            
+            //OnPlayerPlaying();
         }
         else
         {
@@ -57,11 +68,11 @@ public class UMP_Controller : MonoBehaviour
         Debug.Log("OnPlayerOpening");
     }
 
-    public void OnPlayerBuffering()
-    {
-        Debug.Log("OnPlayerBuffering");
-    }
-
+  // public void OnPlayerBuffering()
+  // {
+  //     Debug.Log("OnPlayerBuffering");
+  // }
+  //
     public void OnPlayerPlaying()
     {
        // Debug.Log("OnPlayerPlaying");
@@ -82,18 +93,18 @@ public class UMP_Controller : MonoBehaviour
        float  Offs = delta /duration;
        Debug.Log("OnPlayerPlaying=" + Offs);
        _mediaPlayer.Position = Offs;
-      if (StateController.Instance.GetIsFirstDowloadClip())
-      {
-          if (!StateController.Instance.GetIsDowloadMovie())
-          {
-              StateController.Instance.SetstopDowloadMovie(false);
-              StateController.Instance.StartDeleteClip();
-      
-          }
-      
-          StateController.Instance.SetIsFirstDowload(false);
-      
-      }
+    // if (StateController.Instance.GetIsFirstDowloadClip())
+    // {
+    //     if (!StateController.Instance.GetIsDowloadMovie())
+    //     {
+    //         StateController.Instance.SetstopDowloadMovie(false);
+    //         StateController.Instance.StartDeleteClip();
+    // 
+    //     }
+    // 
+    //     StateController.Instance.SetIsFirstDowload(false);
+    // 
+    // }
     }
 
     public void OnPlayerPaused()
