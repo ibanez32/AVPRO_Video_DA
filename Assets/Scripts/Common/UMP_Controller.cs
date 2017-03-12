@@ -49,13 +49,13 @@ public class UMP_Controller : MonoBehaviour
             _mediaPlayer.Path = filePath;
            _mediaPlayer.Play();
             
-            //OnPlayerPlaying();
+           OnPlayerPlaying();
         }
         else
         {
             _mediaPlayer.Path = "file:///" + filePath;
-            _mediaPlayer.Play();
-            OnPlayerPlaying();
+           _mediaPlayer.Play();
+           OnPlayerPlaying();
         }
     }
     public void Play()
@@ -75,7 +75,6 @@ public class UMP_Controller : MonoBehaviour
   //
     public void OnPlayerPlaying()
     {
-       // Debug.Log("OnPlayerPlaying");
         DateTime localDate = DateTime.Now;
         int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
         var Item = DataSchedule.Instance.GetDataschedules()
@@ -83,30 +82,68 @@ public class UMP_Controller : MonoBehaviour
             elm =>
                 Int32.Parse(elm.TimeStart) <= mSec &&
                 (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
-        Debug.Log("mSec="+mSec);
-        Debug.Log("TimeStart="+Int32.Parse(Item.TimeStart));
+        Debug.Log("mSec=" + mSec);
+        Debug.Log("TimeStart=" + Int32.Parse(Item.TimeStart));
         Debug.Log("Duration=" + Int32.Parse(Item.duration) * 1000);
-        float delta = (float) (mSec - Int32.Parse(Item.TimeStart));
-        float duration = (float) (Int32.Parse(Item.duration)*1000);
-        Debug.Log("delta=" +delta);
-        Debug.Log("Duration=" +duration);
-       float  Offs = delta /duration;
-       Debug.Log("OnPlayerPlaying=" + Offs);
-       _mediaPlayer.Position = Offs;
-    // if (StateController.Instance.GetIsFirstDowloadClip())
-    // {
-    //     if (!StateController.Instance.GetIsDowloadMovie())
-    //     {
-    //         StateController.Instance.SetstopDowloadMovie(false);
-    //         StateController.Instance.StartDeleteClip();
-    // 
-    //     }
-    // 
-    //     StateController.Instance.SetIsFirstDowload(false);
-    // 
-    // }
+        float delta = (float)(mSec - Int32.Parse(Item.TimeStart));
+        float duration = (float)(Int32.Parse(Item.duration) * 1000);
+        Debug.Log("delta=" + delta);
+        Debug.Log("Duration=" + duration);
+        float Offs = delta / duration;
+        Debug.Log("OnPlayerPlaying=" + Offs);
+        _mediaPlayer.Position = Offs;
+     
+        if (StateController.Instance.GetIsFirstDowloadClip())
+        {
+            if (!StateController.Instance.GetIsDowloadMovie())
+            {
+                StateController.Instance.SetstopDowloadMovie(false);
+                StateController.Instance.StartDeleteClip();
+
+            }
+
+            StateController.Instance.SetIsFirstDowload(false);
+
+        }
     }
 
+    IEnumerator StartLoad()
+    {
+        while (!_mediaPlayer.IsPlaying)
+        {
+            yield return null;
+        }
+        DateTime localDate = DateTime.Now;
+        int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
+        var Item = DataSchedule.Instance.GetDataschedules()
+        .Find(
+            elm =>
+                Int32.Parse(elm.TimeStart) <= mSec &&
+                (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
+        Debug.Log("mSec=" + mSec);
+        Debug.Log("TimeStart=" + Int32.Parse(Item.TimeStart));
+        Debug.Log("Duration=" + Int32.Parse(Item.duration) * 1000);
+        float delta = (float)(mSec - Int32.Parse(Item.TimeStart));
+        float duration = (float)(Int32.Parse(Item.duration) * 1000);
+        Debug.Log("delta=" + delta);
+        Debug.Log("Duration=" + duration);
+        float Offs = delta / duration;
+        Debug.Log("OnPlayerPlaying=" + Offs);
+        _mediaPlayer.Position = Offs;
+        yield return new WaitForSeconds(30f);
+        if (StateController.Instance.GetIsFirstDowloadClip())
+        {
+            if (!StateController.Instance.GetIsDowloadMovie())
+            {
+                StateController.Instance.SetstopDowloadMovie(false);
+                StateController.Instance.StartDeleteClip();
+
+            }
+
+            StateController.Instance.SetIsFirstDowload(false);
+
+        }
+    }
     public void OnPlayerPaused()
     {
         Debug.Log("OnPlayerPaused");

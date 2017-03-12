@@ -9,6 +9,7 @@ public class ItemDataschedule
     public string id;
     public string duration;
     public string PathLoad;
+    public string PathLoadGlobal;
     public string PathLocal;
     public bool isLocal;
 }
@@ -47,7 +48,7 @@ public class DataSchedule  {
     {
         foreach (ItemDataschedule clip in DataClips)
         {
-            Debug.Log("No="+clip.number+"    Time="+clip.TimeStart+"   id="+clip.id+"   Path="+clip.PathLocal);
+            Debug.Log("No=" + clip.number + "    Time=" + clip.TimeStart + "   id=" + clip.id + "   PathLoad=" + clip.PathLoad + "   PathLocal=" + clip.PathLocal);
         }
     }
 
