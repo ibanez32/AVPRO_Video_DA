@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using LitJsonSrc;
 using RenderHeads.Media.AVProVideo;
 using RenderHeads.Media.AVProVideo.Demos;
+
 using UGS;
 using UnityEngine;
 using System.Collections;
@@ -49,9 +50,12 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
     private bool SelectedClip;
     private int currentTime;
     private bool IsTime;
+    private ManagerSelecteCurrentMovie SelectedManager;
+    private Context_StrategySelectedMovies contextStrategySelectedMovies;
     // Use this for initialization
     void Start()
     {
+        Debug.Log("Start");
         IsTime =true;
         isWWW = false;
         SelectedClip = false;
@@ -65,13 +69,39 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
         prepare_medias = new List<string>();
         delete_medias = new List<string>();
         saving_medias = new List<string>();
-
+        deleteFolder(Application.streamingAssetsPath);
+        
+        SelectedManager = new ManagerSelecteCurrentMovie(new StrategyMainPlayList());
+        contextStrategySelectedMovies = new Context_StrategySelectedMovies(new StateStategy_Internet_Is_available());
+        if (Application.internetReachability != NetworkReachability.NotReachable)
+        {
+            contextStrategySelectedMovies.FindOut(MarkStrategy.Internet_Is_available);
+        }
+        else
+        {
+            contextStrategySelectedMovies.FindOut(MarkStrategy.Internet_No);
+        }
         //StartCoroutine(_CoroutinaGC());
     }
-
+    public void InternetStatus()
+    {
+        if (Application.internetReachability != NetworkReachability.NotReachable)
+        {
+           // Debug.Log("YES INTERNET");
+            contextStrategySelectedMovies.FindOut(MarkStrategy.Internet_Is_available);
+           
+        }
+        else
+        {
+           // Debug.Log("NO INTERNET");
+            contextStrategySelectedMovies.FindOut(MarkStrategy.Internet_No);
+          
+        }
+    }
     // Update is called once per frame
     void Update()
     {
+        
         // SelectedNumberClip();
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -96,6 +126,24 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
         //------End Writing Movi
     }
 
+    public void SetPathForPlayer(string path, int offset, bool url)
+    {
+        ControllerVP.ReplacePlayVideo(path, offset, url);
+    }
+
+    public SimpleController GetSimpleController()
+    {
+        return ControllerVP;
+    }
+    public void SetOverlay(bool rule)
+    {
+        Debug.Log("OVERLAY="+rule);
+    }
+
+    public ManagerSelecteCurrentMovie GetStrategyselectedMovies()
+    {
+        return SelectedManager;
+    }
     public void SetSelectedClip(bool set)
     {
         SelectedClip = set;
@@ -118,6 +166,7 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
         numberDowloadClip = 0;
 
         CurrentNumberClip = -1;
+        
         //ContextState = new Context(new GetPinState(this));
         LoadShedule();
 
@@ -169,16 +218,25 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
         return isFirstDowloadClip;
     }
 
-   
+    public void StartFirstSelectedMovie()
+    {
+        SelectedManager.FirstStart();
+    }
 
+    public void NextMovie()
+    {
+        SelectedManager.NextMovie();
+    }
    
     IEnumerator _CoroutinaSelectNUmberClip()
     {
 
         for (; ; )
         {
+            InternetStatus();
             DateTime localDate = DateTime.Now;
             int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
+            SelectedManager.SelectedTime(mSec);
             // Debug.Log("Current="+currentTime);
             // Debug.Log("mSec=" + mSec);
             if (mSec==0&&IsTime)
@@ -190,6 +248,10 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
             {
                 IsTime = true;
             }
+            if (GetIsFirstDowloadClip())
+            {
+                
+            }
             // if (mSec>currentTime)
             // {
             //     Debug.Log("GO");
@@ -200,102 +262,102 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
             //     //ChangeState(Mark.GetSchedule);
             //     Debug.Log("Reload");
             // }
-            if (DataSchedule.Instance.GetDataschedules().Count > 0)
-            {
-
-                var Item = DataSchedule.Instance.GetDataschedules()
-                .Find(
-                    elm =>
-                        Int32.Parse(elm.TimeStart) <= mSec &&
-                        (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
-
-                int offset = 0;
-                if (Item != null)
-                {
-                    offset = mSec - Int32.Parse(Item.TimeStart);
-                }
-                if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) >= 0 && DataSchedule.Instance.GetDataschedules().IndexOf(Item) != CurrentNumberClip)
-                {
-                    Debug.Log("Enter numberCurrentDowloadClip=" + numberCurrentDowloadClip);
-                    if (CurrentNumberClip == -1)
-                    {
-                        //  Debug.Log("Enter2");
-                        //SetIsFirstDowload(true);
-                        if (!isDowloadMovie)
-                        {
-                            Debug.Log("Enter3");
-                            PrepareMediasList();
-                            CurrentNumberClip = DataSchedule.Instance.GetDataschedules().IndexOf(Item);
-                            string pathLoad = null;
-                            //  Debug.Log("CurrentNumberClip=" + CurrentNumberClip + "    PathLocal=" + DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal);
-                            if (!string.IsNullOrEmpty(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal))
-                            {
-                                pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
-                                DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
-                                ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
-                            }
-                            else
-                            {
-                                pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
-                                DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
-                                ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
-                            }
-
-
-                            Debug.Log("Path" + pathLoad);
-                           
-                            //  Debug.Log("offset" + offset);
-                        }
-
-                    }
-                    else
-                    {
-                        CurrentNumberClip = DataSchedule.Instance.GetDataschedules().IndexOf(Item);
-                        string pathLoad = null;
-                        //  Debug.Log("CurrentNumberClip=" + CurrentNumberClip + "    PathLocal=" + DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal);
-                        if (!string.IsNullOrEmpty(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal))
-                        {
-                            pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
-                            DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
-                            ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
-
-                        }
-                        else
-                        {
-                            pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
-                            DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
-                            ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
-
-                        }
-
-
-                        Debug.Log("Path" + pathLoad);
-                        Debug.Log("offset" + offset);
-                    }
-
-
-                }
-                if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) < 0 && isFirstDowloadClip)
-                {
-                    if (ControllerVP._mediaPlayer.Control.IsPlaying())
-                    {
-                        StopPlayer();
-                    }
-
-                    if (!isDowloadMovie)
-                    {
-                        isFirstDowloadClip = false;
-                        PrepareMediasList();
-                        SetstopDowloadMovie(false);
-                        StartDeleteClip();
-                    }
-
-                }
-
-                //Debug.Log("Current" + mSec );
-                //  Debug.Log("Current" + mSec + "     TimeStart=" + Item);
-                //   Debug.Log("Current" + mSec +  "    index=" + Item.id);
-            }
+ //       if (DataSchedule.Instance.GetDataschedules().Count > 0)
+ //       {
+ //
+ //           var Item = DataSchedule.Instance.GetDataschedules()
+ //           .Find(
+ //               elm =>
+ //                   Int32.Parse(elm.TimeStart) <= mSec &&
+ //                   (Int32.Parse(elm.TimeStart) + Int32.Parse(elm.duration) * 1000) > mSec);
+ //
+ //           int offset = 0;
+ //           if (Item != null)
+ //           {
+ //               offset = mSec - Int32.Parse(Item.TimeStart);
+ //           }
+ //           if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) >= 0 && DataSchedule.Instance.GetDataschedules().IndexOf(Item) != CurrentNumberClip)
+ //           {
+ //               Debug.Log("Enter numberCurrentDowloadClip=" + numberCurrentDowloadClip);
+ //               if (CurrentNumberClip == -1)
+ //               {
+ //                   //  Debug.Log("Enter2");
+ //                   //SetIsFirstDowload(true);
+ //                   if (!isDowloadMovie)
+ //                   {
+ //                       Debug.Log("Enter3");
+ //                       PrepareMediasList();
+ //                       CurrentNumberClip = DataSchedule.Instance.GetDataschedules().IndexOf(Item);
+ //                       string pathLoad = null;
+ //                       //  Debug.Log("CurrentNumberClip=" + CurrentNumberClip + "    PathLocal=" + DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal);
+ //                       if (!string.IsNullOrEmpty(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal))
+ //                       {
+ //                           pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
+ //                           DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
+ //                           ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+ //                       }
+ //                       else
+ //                       {
+ //                           pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
+ //                           DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
+ //                           ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
+ //                       }
+ //
+ //
+ //                       Debug.Log("Path" + pathLoad);
+ //                      
+ //                       //  Debug.Log("offset" + offset);
+ //                   }
+ //
+ //               }
+ //               else
+ //               {
+ //                   CurrentNumberClip = DataSchedule.Instance.GetDataschedules().IndexOf(Item);
+ //                   string pathLoad = null;
+ //                   //  Debug.Log("CurrentNumberClip=" + CurrentNumberClip + "    PathLocal=" + DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal);
+ //                   if (!string.IsNullOrEmpty(DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal))
+ //                   {
+ //                       pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal;
+ //                       DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = true;
+ //                       ControllerVP.ReplacePlayVideo(pathLoad, offset, false);
+ //
+ //                   }
+ //                   else
+ //                   {
+ //                       pathLoad = DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLoad;
+ //                       DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].isLocal = false;
+ //                       ControllerVP.ReplacePlayVideo(pathLoad, offset, true);
+ //
+ //                   }
+ //
+ //
+ //                   Debug.Log("Path" + pathLoad);
+ //                   Debug.Log("offset" + offset);
+ //               }
+ //
+ //
+ //           }
+ //           if (DataSchedule.Instance.GetDataschedules().IndexOf(Item) < 0 && isFirstDowloadClip)
+ //           {
+ //               if (ControllerVP._mediaPlayer.Control.IsPlaying())
+ //               {
+ //                   StopPlayer();
+ //               }
+ //
+ //               if (!isDowloadMovie)
+ //               {
+ //                   isFirstDowloadClip = false;
+ //                   PrepareMediasList();
+ //                   SetstopDowloadMovie(false);
+ //                   StartDeleteClip();
+ //               }
+ //
+ //           }
+ //
+ //           //Debug.Log("Current" + mSec );
+ //           //  Debug.Log("Current" + mSec + "     TimeStart=" + Item);
+ //           //   Debug.Log("Current" + mSec +  "    index=" + Item.id);
+ //       }
             yield return waitForSeconds;
         }
 
@@ -605,15 +667,20 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
                                         Debug.Log(e.ToString());
                                     }
                                     finally { }
-                                }
-                                File.WriteAllBytes(pathStreamingAssets + DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id + "/" + Path.GetDirectoryName(matchLoacalPlayList.Groups[2].Value) + "/" + Path.GetFileName(matchLoacalPlayList.Groups[2].Value), www_segment.bytes);
-                                www_segment.Dispose();
-                                www_segment = null;
-                                Debug.Log(pathLoadPartsVideo + "/" + matchLoacalPlayList.Groups[2].Value);
+                                    File.WriteAllBytes(pathStreamingAssets + DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id + "/" + Path.GetDirectoryName(matchLoacalPlayList.Groups[2].Value) + "/" + Path.GetFileName(matchLoacalPlayList.Groups[2].Value), www_segment.bytes);
+                                    www_segment.Dispose();
+                                    www_segment = null;
+                                    Debug.Log(pathLoadPartsVideo + "/" + matchLoacalPlayList.Groups[2].Value);
 
-                                Debug.Log(Path.GetDirectoryName(matchLoacalPlayList.Groups[2].Value) + "  " + Path.GetFileName(matchLoacalPlayList.Groups[2].Value));
-                                //End Save Item segment
-                                matchLoacalPlayList = matchLoacalPlayList.NextMatch();
+                                    Debug.Log(Path.GetDirectoryName(matchLoacalPlayList.Groups[2].Value) + "  " + Path.GetFileName(matchLoacalPlayList.Groups[2].Value));
+                                    //End Save Item segment
+                                    matchLoacalPlayList = matchLoacalPlayList.NextMatch();
+                                }
+                                else
+                                {
+                                    Debug.Log("Error Load Segment");
+                                }
+                                
                             }
                             
                         }
@@ -622,14 +689,14 @@ public class StateControllerAVPro : SingletonBehaviour<StateControllerAVPro>
                     }
                     else
                     {
-
+                        Debug.Log("Error Load Local PlayList");
                     }
                 }
                 
             }
             else
             {
-
+                Debug.Log("Error Load Global PlayList");
             }
         }
         
@@ -904,6 +971,10 @@ return null;
             Debug.Log("Shedule=" + shedule.Result);
             StopSelectNumberClip();
             SetstopDowloadMovie(true);
+            while (isDowloadMovie)
+            {
+                yield return null;
+            }
             // StopDeleteClip();
             //StoptDowloadMoive();
             DataSchedule.Instance.ClearDataschedules();
@@ -1001,16 +1072,30 @@ return null;
                     //      }
                     //  }
 
-                    // DataSchedule.Instance.PrintDataSchedule();
-
+                    DataSchedule.Instance.GetDataschedules()[0].isTimeSet = true;
+                    for (int j = 1; j < DataSchedule.Instance.GetDataschedules().Count; j++)
+                    {
+                        int timeStart = Int32.Parse(DataSchedule.Instance.GetDataschedules()[j - 1].TimeStart) +
+                                         Int32.Parse(DataSchedule.Instance.GetDataschedules()[j - 1].duration)*1000;
+                         int timeEnd = Int32.Parse(DataSchedule.Instance.GetDataschedules()[j].TimeStart);
+                        if (timeEnd>timeStart )
+                        {
+                            DataSchedule.Instance.GetDataschedules()[j].isTimeSet = true;
+                        }
+                    }
+                     DataSchedule.Instance.PrintDataSchedule();
                     SetAction();
 
                     Canvas.SetActive(false);
                     SetCurrentClip(-1);
                     SetIsFirstDowload(true);
                     //PrepareMediasList();
-
+                    StateControllerAVPro.Instance.PrepareMediasList();
+                    SelectedManager.FirstStart();
                     StartSelectNumberClip();
+                    
+                    StateControllerAVPro.Instance.SetstopDowloadMovie(false);
+                    StateControllerAVPro.Instance.StartDeleteClip();
                     // SetSelectedClip(true);
                     //  StartDowloadMoive();
                     DateTime localDate = DateTime.Now;
@@ -1028,11 +1113,13 @@ return null;
             else
             {
                 Debug.Log("No");
+                LoadShedule();
             }
         }
         else
         {
-
+            Debug.Log("No Connect");
+            LoadShedule();
         }
     }
     public string ShowNetworkInterfaces()

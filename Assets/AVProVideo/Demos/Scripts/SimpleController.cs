@@ -74,7 +74,8 @@ namespace RenderHeads.Media.AVProVideo.Demos
                     break;
                 case MediaPlayerEvent.EventType.ReadyToPlay:
 
-
+                     _mediaPlayer.Control.Play();
+                    _mediaPlayer.Control.SeekFast(Offset);
                     break;
                 case MediaPlayerEvent.EventType.Started:
 
@@ -82,8 +83,8 @@ namespace RenderHeads.Media.AVProVideo.Demos
                 case MediaPlayerEvent.EventType.FirstFrameReady:
 
 
-                    _mediaPlayer.Control.Play();
-                    StartCoroutine(StartLoad());
+                   
+                   // StartCoroutine(StartLoad());
 
 
 
@@ -101,6 +102,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
                     GatherProperties();
                     break;
                 case MediaPlayerEvent.EventType.FinishedPlaying:
+                    StateControllerAVPro.Instance.NextMovie();
                     if (false)
                     {
                         int curCL = StateControllerAVPro.Instance.GetCurrentClip();

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
 
@@ -12,6 +13,7 @@ public class ItemDataschedule
     public string PathLoadGlobal;
     public string PathLocal;
     public bool isLocal;
+    public bool isTimeSet;
 }
 public class DataSchedule  {
 
@@ -48,7 +50,17 @@ public class DataSchedule  {
     {
         foreach (ItemDataschedule clip in DataClips)
         {
-            Debug.Log("No=" + clip.number + "    Time=" + clip.TimeStart + "   id=" + clip.id + "   PathLoad=" + clip.PathLoad + "   PathLocal=" + clip.PathLocal);
+            //Debug.Log("No=" + clip.number + "    Time=" + clip.TimeStart + "   id=" + clip.id + "   PathLoad=" + clip.PathLoad + "   PathLocal=" + clip.PathLocal);
+            if (clip.isTimeSet)
+            {
+                float time = Int32.Parse(clip.TimeStart)/3600000f;
+                Debug.Log("No=" + clip.number + "    Time=" + clip.TimeStart + "   id=" + clip.id + "   IsTimeset=" + clip.isTimeSet+"    Time="+time);
+            }
+            else
+            {
+                Debug.Log("No=" + clip.number + "    Time=" + clip.TimeStart + "   id=" + clip.id + "   IsTimeset=" + clip.isTimeSet);
+            }
+          
         }
     }
 
