@@ -18,9 +18,15 @@ public class UMP_Controller : MonoBehaviour
           // 
           //  _mediaPlayer.AddBufferingEvent(OnPlayerBuffering);
             _mediaPlayer.AddStoppedEvent(OnStoped);
+            _mediaPlayer.AddEndReachedEvent(PlayerEndReached);
         }
     }
 
+  private  void PlayerEndReached()
+    {
+        Debug.Log("PlayerEndReached");
+
+    }
     private void OnPlayerBuffering(float arg0)
     {
         Debug.Log("OnPlayerBuffering="+arg0);
@@ -95,6 +101,8 @@ public class UMP_Controller : MonoBehaviour
   //
     public void OnStoped()
     {
+        Debug.Log("STOPED=" + _mediaPlayer.Position);
+        
         
     }
     public void OnPlayerPlaying()
@@ -191,20 +199,20 @@ public class UMP_Controller : MonoBehaviour
             }
 
         }
-        DataSchedule.Instance.PrintDataSchedule();
+      //  DataSchedule.Instance.PrintDataSchedule();
         yield return null;
-        if (StateController.Instance.GetIsFirstDowloadClip())
-        {
-            if (!StateController.Instance.GetIsDowloadMovie())
-            {
-                StateController.Instance.SetstopDowloadMovie(false);
-                StateController.Instance.StartDeleteClip();
-
-            }
-
-            StateController.Instance.SetIsFirstDowload(false);
-
-        }
+       // if (StateController.Instance.GetIsFirstDowloadClip())
+       // {
+       //     if (!StateController.Instance.GetIsDowloadMovie())
+       //     {
+       //         StateController.Instance.SetstopDowloadMovie(false);
+       //         StateController.Instance.StartDeleteClip();
+       //
+       //     }
+       //
+       //     StateController.Instance.SetIsFirstDowload(false);
+       //
+       // }
     }
     public void OnPlayerPaused()
     {

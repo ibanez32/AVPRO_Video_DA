@@ -72,15 +72,15 @@ public class StateController : SingletonBehaviour<StateController>
     // Update is called once per frame
     void Update()
     {
-      
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
         }
-        
+
     }
 
-   
+
     public void SetstopDowloadMovie(bool set)
     {
         StopDowloadMoive = set;
@@ -152,7 +152,7 @@ public class StateController : SingletonBehaviour<StateController>
 
 
 
-    
+
     IEnumerator _CoroutinaSelectNUmberClip()
     {
 
@@ -160,7 +160,7 @@ public class StateController : SingletonBehaviour<StateController>
         {
             DateTime localDate = DateTime.Now;
             int mSec = (Int32.Parse(localDate.ToString("HH")) * 3600 + Int32.Parse(localDate.ToString("mm")) * 60 + Int32.Parse(localDate.ToString("ss"))) * 1000;
-            
+
             if (DataSchedule.Instance.GetDataschedules().Count > 0)
             {
 
@@ -259,7 +259,7 @@ public class StateController : SingletonBehaviour<StateController>
 
 
                 }
-                
+
 
                 //Debug.Log("Current" + mSec );
                 //  Debug.Log("Current" + mSec + "     TimeStart=" + Item);
@@ -440,9 +440,9 @@ public class StateController : SingletonBehaviour<StateController>
 
 
     }
-    
 
-    
+
+
     IEnumerator _CoroutinaLoadPlayList()
     {
         Debug.Log("Start Dowload=" + DataSchedule.Instance.GetDataschedules()[numberCurrentDowloadClip].id);
@@ -717,7 +717,7 @@ public class StateController : SingletonBehaviour<StateController>
         }
 
     }
-   
+
     //----- End Dowload Movi
     //------- Delete Clip
     public void StartDeleteClip()
@@ -733,7 +733,7 @@ public class StateController : SingletonBehaviour<StateController>
         }
     }
 
-   
+
     IEnumerator _CoroutinaDeleteClip()
     {
         string pathStreamingAssets = Application.streamingAssetsPath + "/";
@@ -795,7 +795,7 @@ public class StateController : SingletonBehaviour<StateController>
         }
     }
     //--------END Delete CLIP
-  
+
 
 
 
@@ -844,7 +844,7 @@ return null;
         file.Close();
 #endif
     }
-    
+
     private void LoadShedule()
     {
         UGS.UgsClient m_client_shedule = new UgsClient("https://beta.dropadverts.com/player/get-schedule");
@@ -994,7 +994,7 @@ return null;
                     Canvas.SetActive(false);
                     SetCurrentClip(-1);
                     SetIsFirstDowload(true);
-                    DataSchedule.Instance.PrintDataSchedule();
+                    // DataSchedule.Instance.PrintDataSchedule();
                     StartSelectNumberClip();
 
                 }

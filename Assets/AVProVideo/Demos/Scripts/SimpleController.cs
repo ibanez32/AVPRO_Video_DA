@@ -103,29 +103,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
                     break;
                 case MediaPlayerEvent.EventType.FinishedPlaying:
                     StateControllerAVPro.Instance.NextMovie();
-                    if (false)
-                    {
-                        int curCL = StateControllerAVPro.Instance.GetCurrentClip();
-                        curCL++;
-                        if (curCL == DataSchedule.Instance.GetDataschedules().Count)
-                        {
-                            curCL = 0;
-                        }
-                        StateControllerAVPro.Instance.SetCurrentClip(curCL);
-
-                        string pathLoad = null;
-                        //  Debug.Log("CurrentNumberClip=" + CurrentNumberClip + "    PathLocal=" + DataSchedule.Instance.GetDataschedules()[CurrentNumberClip].PathLocal);
-                        if (!string.IsNullOrEmpty(DataSchedule.Instance.GetDataschedules()[StateControllerAVPro.Instance.GetCurrentClip()].PathLocal))
-                        {
-                            pathLoad = DataSchedule.Instance.GetDataschedules()[StateControllerAVPro.Instance.GetCurrentClip()].PathLocal;
-                        }
-                        else
-                        {
-                            pathLoad = DataSchedule.Instance.GetDataschedules()[StateControllerAVPro.Instance.GetCurrentClip()].PathLoad;
-                        }
-                        int offset = 0;
-                        ReplacePlayVideo(pathLoad, offset, false);
-                    }
+                   
 
                     break;
             }
@@ -181,18 +159,7 @@ namespace RenderHeads.Media.AVProVideo.Demos
             //   yield return new WaitForSeconds(1f); 
             //    _mediaPlayer.Play();
            yield return new WaitForSeconds(5f);
-           if (StateControllerAVPro.Instance.GetIsFirstDowloadClip())
-           {
-               if (!StateControllerAVPro.Instance.GetIsDowloadMovie())
-               {
-                   StateControllerAVPro.Instance.SetstopDowloadMovie(false);
-                   StateControllerAVPro.Instance.StartDeleteClip();
-          
-               }
-          
-               StateControllerAVPro.Instance.SetIsFirstDowload(false);
-          
-           }
+           
         }
         private void AddEvent(MediaPlayerEvent.EventType et)
         {

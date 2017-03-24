@@ -67,8 +67,8 @@ public class FB_Controller_UMP : MonoBehaviour
                     if (dict[key].ToString() == "DO")
                     {
                         Debug.Log("DO");
-                        //StateController.Instance.ChangeState(Mark.GetSchedule);
-                        StateController.Instance.ChangeState(Mark.GetSchedule);
+                        //State_Controller_UMP_Overlay.Instance.ChangeState(Mark.GetSchedule);
+                        State_Controller_UMP_Overlay.Instance.ChangeState(Mark.GetSchedule);
                     }
                 }
                 DoDebug(key + " = " + dict[key].ToString());
@@ -178,7 +178,7 @@ public class FB_Controller_UMP : MonoBehaviour
         // Unnecessarily skips a frame, really, unnecessary.
         yield return null;
         // action.GetValue();
-        StateController.Instance.StartController();
+        State_Controller_UMP_Overlay.Instance.StartController();
        
 
 
